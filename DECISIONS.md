@@ -1,0 +1,18 @@
+# DECISIONS
+
+- Menus, HUD and overlays are DOM (fast, crisp, accessible, easy to test); Phaser draws only the maze and actors.
+- Integer scaling: the canvas is rendered at an integer number of device pixels per game pixel; extra space is filled with the world backdrop. App width capped at 640 CSS px on desktop.
+- Maze = 9x11 cell lattice, mirrored, braided (no dead ends), fixed seed per level; BFS-verified in `tests/unit.mjs`.
+- Secret rooms: leaf cell behind a "fake wall" (passable for player, wall for enemies), from world 2; mirrored pair = 2 rooms.
+- Bonus slots: 1 timed bonus active at once (new replaces oldest), 2 from character level 41.
+- Hard mode (level 61): enemies +6% speed (cap 95%), frightened -1.5s, rewards x1.5.
+- Legendary: lvl 81 enemies within 2 tiles 15% slower; lvl 91 score x1.25; lvl 100 title + gold aura.
+- XP: pellets 1, coin 2, enemy 15, level clear 1500+270*index (60% on replays, +10%/star) so the campaign lands near level 40-45.
+- Boss levels end when the boss is defeated; boss bonus (+100/+300) only on first clear. Spheres respawn after 10s there.
+- Lose a run: collected coins and XP are kept, no clear bonus.
+- Skill tree is per character; free respec.
+- Stars: no deaths / time under par / every maze coin.
+- Reference portraits ref1-4.jpg are shown on the character cards (ref3 Valera, ref2 Moggsu, ref1 Zetaboss, ref4 Hulioboss; Dildoboss has no reference, uses its sprite). In-maze sprites are drawn procedurally; PNG sheets override them (see README).
+- Telegram CloudStorage first, localStorage fallback; save version 2 with migration from v1.
+- Audio is 100% Web Audio synthesis; music starts after the first tap.
+- window.__game exists only in dev builds.
