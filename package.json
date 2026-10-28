@@ -1,0 +1,19 @@
+{
+  "name": "looksmaxxer-maze",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "test:unit": "node tests/unit.mjs"
+  },
+  "dependencies": {
+    "@fontsource/press-start-2p": "^5.3.0",
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.5"
+  }
+}
