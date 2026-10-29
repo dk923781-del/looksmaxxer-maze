@@ -169,3 +169,13 @@ export const VOICE = {
   hulio: { pitch: 1.7, rate: 1.3, blip: 520, lines: { intro: 'Look into my eyes, mogger.', hit: 'Error. Aura leaking.', phase2: 'Glitch mode.', dead: 'System failure. Respect.', kill: 'Cope.' } },
   dildo: { pitch: 0.1, rate: 0.7, blip: 110, lines: { intro: 'Welcome to the tower. Prepare to be mogged.', hit: 'Impossible.', phase2: 'Now I am serious.', phase3: 'Final form. Aura maximum.', dead: 'You are the ultimate mogger.', kill: 'Ratio.' } },
 };
+
+// ---------------- music credits (licensed files, Pixabay Content License) ----------------
+export const MUSIC_CREDITS = [
+  { slot: 'Menu, World 1', title: 'Phonk - Phonk Aura', artist: 'MondaMusic', url: 'https://pixabay.com/music/phonk-phonk-phonk-aura-542549/' },
+  { slot: 'World 2', title: 'Brazilian Phonk', artist: 'Sub_Clair', url: 'https://pixabay.com/music/phonk-brazilian-phonk-571897/' },
+  { slot: 'World 3', title: 'Phonk Aura Drift Night Ride', artist: 'alex-morgan', url: 'https://pixabay.com/music/phonk-phonk-aura-drift-night-ride-587401/' },
+  { slot: 'World 4', title: 'Brazilian Phonk Instrumental Aura Funk', artist: 'echoes_of_lumen', url: 'https://pixabay.com/music/phonk-brazilian-phonk-instrumental-aura-funk-588665/' },
+  { slot: 'World 5', title: 'Brazilian Phonk Bounce Heat', artist: 'alex-morgan', url: 'https://pixabay.com/music/phonk-brazilian-phonk-bounce-heat-573874/' },
+  { slot: 'Bosses', title: 'Brazilian Phonk Music', artist: 'AbsoluteSound', url: 'https://pixabay.com/music/phonk-brazilian-phonk-music-529762/' },
+];

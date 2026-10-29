@@ -1,7 +1,7 @@
 import { bus } from './bus.js';
 import * as SV from './save.js';
 import { levelFromXp, stageForLevel, xpForLevel } from './config.js';
-import { WORLDS, levelDef, CHARACTERS, CHAR_BY_ID, SKINS, SKIN_BY_ID, ITEMS, SKILL_BRANCHES, LEGENDARY, STAGE_NAMES, QUEST_POOL, BONUS_TYPES, BOSSES } from './data.js';
+import { MUSIC_CREDITS, WORLDS, levelDef, CHARACTERS, CHAR_BY_ID, SKINS, SKIN_BY_ID, ITEMS, SKILL_BRANCHES, LEGENDARY, STAGE_NAMES, QUEST_POOL, BONUS_TYPES, BOSSES } from './data.js';
 import { playerPreviewURL } from './textures.js';
 import { sfx, initAudio, setVolumes, startMusic, stopMusic } from './audio.js';
 import { setBack, setVibration, haptic } from './tg.js';
@@ -195,6 +195,9 @@ const actions = {
       showMain(true);
       toast('Progress reset');
     }),
+  credits: () => {
+    openModal(`<h2>CREDITS</h2><div style="font-size:8px;line-height:1.9">${MUSIC_CREDITS.map((c) => `<div class="kv" style="display:block"><span class="dim">${c.slot}</span><br><b>${c.title}</b> by ${c.artist}</div>`).join('')}<p class="dim">Music: Pixabay Content License. SFX, voices and in-game tracks are synthesized in the game.</p></div><button class="btn" data-act="closemodal" id="credits-close">CLOSE</button>`);
+  },
   resume: () => ui.scene.resume(),
   restart: () => {
     closeModal();
@@ -462,6 +465,7 @@ function showSettings() {
      <div class="card row"><span class="grow">Mute all</span><button class="btn small toggle" data-act="toggle" data-k="mute" id="t-mute">${st.mute ? 'ON' : 'OFF'}</button></div>
      <div class="card row"><span class="grow">Vibration</span><button class="btn small toggle" data-act="toggle" data-k="vibration" id="t-vib">${st.vibration ? 'ON' : 'OFF'}</button></div>
      <div class="card row"><span class="grow">Mobile controls</span><button class="btn small toggle" data-act="toggle" data-k="controls" id="t-ctl">${st.controls === 'dpad' ? 'D-PAD' : 'SWIPE'}</button></div>
+     <button class="btn" data-act="credits" id="btn-credits">CREDITS</button>
      <button class="btn" style="border-color:var(--red);color:var(--red)" data-act="reset" id="btn-reset">RESET PROGRESS</button>
      <div class="dim" style="font-size:7px;text-align:center;line-height:1.8">Looksmaxxer Maze: Pixel Evolution<br>Keys: arrows / WASD, Space = ability, Esc = pause</div>`,
     { back: true, title: 'SETTINGS' },

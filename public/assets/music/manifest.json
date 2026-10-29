@@ -1,1 +1,10 @@
-{ "tracks": {} }
+{
+ "tracks": {
+  "0": "menu.mp3",
+  "1": "world2.mp3",
+  "2": "world3.mp3",
+  "3": "world4.mp3",
+  "4": "world5.mp3",
+  "5": "boss.mp3"
+ }
+}

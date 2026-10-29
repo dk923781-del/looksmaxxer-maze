@@ -427,6 +427,31 @@ with sync_playwright() as p:
         assert res['back'] > 0.003, res
         pg.close()
 
+    @run('licensed music files: all 6 slots decode, play through the music bus and respond to volume/mute')
+    def _():
+        pg = new_page(b)
+        pg.click('#btn-play')
+        res = js(pg, '''(async()=>{ const a = window.__game.mods.audio; a.initAudio(); const out={}; const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
+          a.setVolumes(0.6,0,false,{voice:1,bass:true});
+          for(let i=0;i<6;i++){ a.startMusic(i); let t=0; while(!a.playingFile() && t<6000){ await wait(100); t+=100; } await wait(600); let m=0,s=0; for(let k=0;k<15;k++){ const v=a.levelNow(); m=Math.max(m,v); s+=v; await wait(50);} out['t'+i]={file:a.playingFile(), peak:m, avg:s/15}; }
+          a.setVolumes(0.6,0,true,{voice:1}); await wait(300); out.muted=a.levelNow();
+          a.stopMusic(); out.stopped=!a.playingFile(); return out; })()''')
+        for i in range(6):
+            assert res[f't{i}']['file'] and res[f't{i}']['avg'] > 0.01 and res[f't{i}']['peak'] < 0.9, (i, res)
+        assert res['muted'] < 0.002 and res['stopped'], res
+        pg.close()
+
+    @run('credits screen lists all licensed tracks')
+    def _():
+        pg = new_page(b)
+        pg.click('#btn-settings')
+        pg.click('#btn-credits')
+        txt = pg.inner_text('#modal')
+        for name in ['MondaMusic', 'Sub_Clair', 'alex-morgan', 'echoes_of_lumen', 'AbsoluteSound']:
+            assert name in txt, name
+        pg.click('#credits-close')
+        pg.close()
+
     @run('characters use the face sprite sheets; skins recolour; 4 evolution rows')
     def _():
         pg = new_page(b)

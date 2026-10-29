@@ -452,9 +452,18 @@ export function startMusic(i) {
         stopFile();
         if (!fileG) {
           fileG = ctx.createGain();
-          fileG.gain.value = 2.6;
           fileG.connect(musicG);
         }
+        // normalise loudness so every file sits at the same level as the synth tracks
+        const ch = buf.getChannelData(0);
+        let sum = 0;
+        let n = 0;
+        for (let k = 0; k < ch.length; k += 37) {
+          sum += ch[k] * ch[k];
+          n++;
+        }
+        const rms = Math.sqrt(sum / Math.max(1, n)) || 0.1;
+        fileG.gain.value = Math.max(0.3, Math.min(6, 0.5 / rms));
         fileSrc = ctx.createBufferSource();
         fileSrc.buffer = buf;
         fileSrc.loop = true;
