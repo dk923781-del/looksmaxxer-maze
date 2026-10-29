@@ -398,10 +398,72 @@ let step = 0;
 let nextT = 0;
 let cur = null;
 
+// ---- optional real music files (public/assets/music/manifest.json: { "tracks": { "0": "menu.mp3", ... } })
+let fileMap = {};
+let musicBase = '';
+const bufCache = new Map();
+let fileSrc = null;
+let fileG;
+
+export async function configureMusicFiles(base) {
+  try {
+    const r = await fetch(`${base}assets/music/manifest.json`);
+    if (r.ok) {
+      fileMap = (await r.json()).tracks || {};
+      musicBase = `${base}assets/music/`;
+    }
+  } catch (e) {
+    fileMap = {};
+  }
+}
+
+async function loadFile(i) {
+  if (bufCache.has(i)) return bufCache.get(i);
+  const r = await fetch(musicBase + fileMap[i]);
+  const buf = await ctx.decodeAudioData(await r.arrayBuffer());
+  bufCache.set(i, buf);
+  return buf;
+}
+
+function stopFile() {
+  if (fileSrc) {
+    try {
+      fileSrc.stop();
+    } catch (e) {
+      /* already stopped */
+    }
+    fileSrc = null;
+  }
+}
+
+export const playingFile = () => !!fileSrc;
+
 export function startMusic(i) {
   wantTrack = i;
   if (!ctx) return;
   stopTimer();
+  stopFile();
+  if (fileMap[i]) {
+    // synth plays until the file is decoded, then the file takes over
+    loadFile(i)
+      .then((buf) => {
+        if (wantTrack !== i || !ctx) return;
+        stopTimer();
+        stopFile();
+        if (!fileG) {
+          fileG = ctx.createGain();
+          fileG.gain.value = 2.6;
+          fileG.connect(musicG);
+        }
+        fileSrc = ctx.createBufferSource();
+        fileSrc.buffer = buf;
+        fileSrc.loop = true;
+        fileSrc.connect(fileG);
+        fileSrc.start();
+        revSend.gain.setTargetAtTime(0.1, ctx.currentTime, 0.1);
+      })
+      .catch(() => {});
+  }
   cur = TRACKS[i];
   step = 0;
   nextT = ctx.currentTime + 0.1;
@@ -417,6 +479,7 @@ function stopTimer() {
 export function stopMusic() {
   wantTrack = null;
   stopTimer();
+  stopFile();
 }
 
 export const currentTrack = () => wantTrack;

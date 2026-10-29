@@ -4,6 +4,7 @@ import './styles.css';
 import { MW, MH } from './config.js';
 import * as texMod from './textures.js';
 import * as audioMod from './audio.js';
+import { configureMusicFiles } from './audio.js';
 import * as dataMod from './data.js';
 import { loadSheets } from './textures.js';
 import { CHARACTERS } from './data.js';
@@ -40,6 +41,7 @@ async function main() {
     sheets = [];
   }
   await loadSheets(sheets, BASE);
+  await configureMusicFiles(BASE);
   try {
     await document.fonts.load('8px "Press Start 2P"');
   } catch (e) {
