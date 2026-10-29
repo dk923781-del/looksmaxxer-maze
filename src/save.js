@@ -13,7 +13,7 @@ export function defaultSave() {
     levels: {}, // '1-1': {s: stars, b: best score, h: hard cleared}
     bosses: {}, // zeta: true
     inv: { blackpill: 0, energy: 0, shield: 0 },
-    settings: { music: 0.6, sfx: 0.8, mute: false, vibration: true, controls: 'dpad' },
+    settings: { music: 0.6, sfx: 0.8, voice: 0.8, bass: true, mute: false, vibration: true, controls: 'dpad' },
     quests: { date: '', list: [], stats: {} },
     stats: { clears: 0, eaten: 0, coins: 0, deaths: 0 },
     hard: false,

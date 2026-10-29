@@ -2,6 +2,10 @@ import Phaser from 'phaser';
 import '@fontsource/press-start-2p/400.css';
 import './styles.css';
 import { MW, MH } from './config.js';
+import * as texMod from './textures.js';
+import * as audioMod from './audio.js';
+import * as dataMod from './data.js';
+import { loadSheets } from './textures.js';
 import { CHARACTERS } from './data.js';
 import GameScene from './scenes/GameScene.js';
 import { initTelegram } from './tg.js';
@@ -18,8 +22,7 @@ class Boot extends Phaser.Scene {
   }
   preload() {
     // optional custom sprite sheets: list ids in public/assets/characters/manifest.json
-    this.load.setBaseURL('');
-    for (const id of this.registry.get('sheets') || []) this.load.image('sheet_' + id, `${BASE}assets/characters/${id}.png`);
+
   }
   create() {
     this.scene.start('game');
@@ -36,6 +39,7 @@ async function main() {
   } catch (e) {
     sheets = [];
   }
+  await loadSheets(sheets, BASE);
   try {
     await document.fonts.load('8px "Press Start 2P"');
   } catch (e) {
@@ -85,7 +89,7 @@ async function main() {
       fit();
       initUI(scene);
       fit();
-      if (import.meta.env.DEV) window.__game = { game, scene, SV, bus, play: playLevel, ui: uiState, get S() { return scene.S; } };
+      if (import.meta.env.DEV) window.__game = { game, scene, SV, bus, play: playLevel, mods: { textures: texMod, audio: audioMod, data: dataMod }, ui: uiState, get S() { return scene.S; } };
       document.body.dataset.ready = '1';
     };
     if (scene.sys.isActive() && scene.mz) boot();

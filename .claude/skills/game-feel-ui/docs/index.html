@@ -1,0 +1,2882 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>game-feel-ui — Make Frontends Dynamic, Fluid &amp; Tactile with Game Dev Physics</title>
+  <meta name="description" content="An open-source skill for Claude Code, Cursor, Codex, and Windsurf that spots flat, lifeless UI interactions and makes your frontend feel dynamic, fluid, and tactile using 39 Game Dev mechanics, Coyote Time UX forgiveness, and 0 KB Web Audio." />
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem('gf:theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Dark Studio Theme (Default) */
+      --bg: #0e0e11;
+      --bg-elevated: #141419;
+      --surface: #17171d;
+      --surface-2: #1e1e26;
+      --surface-3: #262630;
+      --border: rgba(244, 242, 237, 0.09);
+      --border-strong: rgba(244, 242, 237, 0.18);
+      --text: #f4f2ed;
+      --text-secondary: #a6a29b;
+      --text-muted: #6e6b65;
+      --header-bg: rgba(14, 14, 17, 0.82);
+      --shadow-card: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+      --shadow-studio: 0 34px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1);
+
+      /* Semantic Tactile Accents */
+      --vermilion: #ff5722;
+      --vermilion-soft: rgba(255, 87, 34, 0.14);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.14);
+      --indigo: #6366f1;
+      --indigo-soft: rgba(99, 102, 241, 0.15);
+      --emerald: #10b981;
+      --emerald-soft: rgba(16, 185, 129, 0.14);
+      --cyan: #06b6d4;
+      --cyan-soft: rgba(6, 182, 212, 0.14);
+      --danger: #ef4444;
+
+      /* Typography */
+      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+      /* Physics Curves */
+      --spring-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --spring-snappy: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html[data-theme="light"] {
+      --bg: #f6f4ef;
+      --bg-elevated: #edeae2;
+      --surface: #ffffff;
+      --surface-2: #f3f0e8;
+      --surface-3: #e6e2d8;
+      --border: rgba(20, 20, 24, 0.09);
+      --border-strong: rgba(20, 20, 24, 0.18);
+      --text: #121215;
+      --text-secondary: #57544e;
+      --text-muted: #87837b;
+      --header-bg: rgba(246, 244, 239, 0.85);
+      --shadow-card: 0 16px 38px rgba(20, 18, 14, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      --shadow-studio: 0 32px 80px rgba(20, 18, 14, 0.18), 0 0 0 1px rgba(20, 20, 24, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
+      transition: background-color 280ms ease, color 280ms ease;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      background-image:
+        radial-gradient(circle at 14% 6%, rgba(255, 87, 34, 0.08), transparent 36rem),
+        radial-gradient(circle at 86% 12%, rgba(99, 102, 241, 0.08), transparent 38rem);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.022;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Floating Header */
+    .topbar-wrap {
+      position: sticky;
+      top: 14px;
+      z-index: 100;
+      padding: 0 24px;
+      margin-top: 14px;
+    }
+
+    .topbar {
+      max-width: 1100px;
+      height: 54px;
+      margin: 0 auto;
+      padding: 0 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-strong);
+      background: var(--header-bg);
+      backdrop-filter: blur(16px) saturate(1.2);
+      -webkit-backdrop-filter: blur(16px) saturate(1.2);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-seal {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      background: var(--vermilion);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 4px 12px rgba(255, 87, 34, 0.35);
+    }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 13.5px;
+      font-weight: 500;
+    }
+
+    .topbar-nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 140ms ease;
+    }
+
+    .topbar-nav a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 780px) {
+      .topbar-nav { display: none; }
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 140ms var(--spring-snappy);
+      user-select: none;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+
+    .pill-btn:active {
+      transform: scale(0.95);
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 2px;
+      height: 32px;
+      align-items: center;
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 120ms ease;
+    }
+
+    .lang-btn.active {
+      background: var(--vermilion);
+      color: #fff;
+    }
+
+    /* =====================================================================
+       SECTION 1: HERO SPLIT + SLOW-MOTION COMPARISON STAGE
+       ===================================================================== */
+    .hero {
+      padding: 60px 0 56px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.04fr 0.96fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    @media (max-width: 960px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 13px;
+      border-radius: 99px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--vermilion);
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 4.7vw, 4.1rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.04;
+      color: var(--text);
+      margin-bottom: 18px;
+    }
+
+    h1 em {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--vermilion);
+      letter-spacing: -0.01em;
+      padding-right: 4px;
+    }
+
+    .hero-lead {
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      max-width: 550px;
+      margin-bottom: 26px;
+    }
+
+    .terminal-card {
+      background: #0d0d10;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      max-width: 490px;
+      cursor: pointer;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: transform 140ms var(--spring-snappy), border-color 140ms ease;
+      margin-bottom: 22px;
+    }
+
+    .terminal-card:hover {
+      border-color: var(--vermilion);
+    }
+
+    .terminal-card:active {
+      transform: scale(0.985);
+    }
+
+    .terminal-cmd {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      color: #f4f2ed;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .terminal-prompt {
+      color: var(--vermilion);
+      font-weight: 600;
+      user-select: none;
+    }
+
+    .terminal-copy {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #d5d2cd;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+
+    .agent-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .agent-badge {
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    /* RIGHT HERO COLUMN: SLOW-MOTION COMPARISON STAGE */
+    .slowmo-card {
+      background: #121217;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-studio);
+      color: #f4f2ed;
+    }
+
+    .slowmo-header {
+      background: #181820;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .window-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .speed-pills {
+      display: inline-flex;
+      background: #0b0b0e;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .speed-btn {
+      border: none;
+      background: transparent;
+      color: #8e8b84;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 120ms ease;
+    }
+
+    .speed-btn.active {
+      background: var(--vermilion);
+      color: #fff;
+    }
+
+    .slowmo-tracks {
+      padding: 18px;
+      background-color: #0b0b0f;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .comp-lane {
+      background: #15151c;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .comp-lane.juice-lane {
+      background: #17151c;
+      border-color: rgba(255, 87, 34, 0.45);
+      box-shadow: 0 10px 30px rgba(255, 87, 34, 0.08);
+    }
+
+    .lane-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lane-badge {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #d5d2cd;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lane-badge::after {
+      content: "WITHOUT SKILL";
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #8e8b84;
+    }
+
+    .juice-lane .lane-badge {
+      color: #ffffff;
+    }
+
+    .juice-lane .lane-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--vermilion);
+      box-shadow: 0 0 10px var(--vermilion);
+    }
+
+    .juice-lane .lane-badge::after {
+      content: "WITH SKILL";
+      background: rgba(255, 87, 34, 0.18);
+      border-color: rgba(255, 87, 34, 0.45);
+      color: #ff8a65;
+    }
+
+    .lane-sub {
+      font-size: 12.5px;
+      color: #a6a29b;
+    }
+
+    /* Large Hero Toggle Switches */
+    .hero-switch {
+      width: 156px;
+      height: 52px;
+      border-radius: 99px;
+      background: #23232d;
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: background-color 250ms ease, border-color 250ms ease;
+    }
+
+    .hero-switch.on-flat {
+      background: #3d3d4d;
+    }
+
+    .hero-switch.on-juice {
+      background: var(--vermilion);
+      border-color: #ff8a65;
+    }
+
+    .hero-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #9e9b94;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    #heroJuiceSwitch .hero-thumb {
+      background: #ffffff;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 4 Phase Pills inside Slow-Mo Stage */
+    .phase-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .phase-pill {
+      background: #15151c;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      padding: 7px 6px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #6e6b65;
+      transition: all 140ms ease;
+    }
+
+    .phase-pill.lit-1 {
+      border-color: var(--amber);
+      background: var(--amber-soft);
+      color: var(--amber);
+      font-weight: 600;
+    }
+    .phase-pill.lit-2 {
+      border-color: var(--indigo);
+      background: var(--indigo-soft);
+      color: #a5b4fc;
+      font-weight: 600;
+    }
+    .phase-pill.lit-3 {
+      border-color: var(--vermilion);
+      background: var(--vermilion-soft);
+      color: #ff8a65;
+      font-weight: 600;
+    }
+    .phase-pill.lit-4 {
+      border-color: var(--emerald);
+      background: var(--emerald-soft);
+      color: var(--emerald);
+      font-weight: 600;
+    }
+
+    .slowmo-footer {
+      background: #16161e;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .run-demo-btn {
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 10px;
+      background: var(--vermilion);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 22px rgba(255, 87, 34, 0.35);
+      transition: transform 150ms var(--spring-overshoot);
+    }
+
+    .run-demo-btn:active {
+      transform: scale(0.95);
+    }
+
+    .more-demos-link {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: #d5d2cd;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      transition: all 140ms ease;
+    }
+
+    .more-demos-link:hover {
+      border-color: var(--vermilion);
+      color: #fff;
+    }
+
+    /* =====================================================================
+       SECTION 2: INTERACTIVE SANDBOX (12 A/B COMPARISONS)
+       ===================================================================== */
+    .lab-section {
+      padding: 44px 0 56px;
+    }
+
+    .section-kicker {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--vermilion);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: clamp(1.85rem, 3.4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .section-heading em {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--vermilion);
+    }
+
+    .section-desc {
+      font-size: 15.5px;
+      color: var(--text-secondary);
+      max-width: 650px;
+      margin-bottom: 24px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .filter-tab {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: all 140ms ease;
+    }
+
+    .filter-tab:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    .filter-tab.active {
+      background: var(--vermilion);
+      color: #fff;
+      border-color: var(--vermilion);
+    }
+
+    .specimens-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 780px) {
+      .specimens-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .specimen {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+    }
+
+    .specimen[data-hidden="true"] {
+      display: none;
+    }
+
+    .specimen-head {
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .fam-pill {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+
+    .fam-impact { background: var(--vermilion-soft); color: var(--vermilion); }
+    .fam-spring { background: var(--indigo-soft); color: var(--indigo); }
+    .fam-coyote { background: var(--amber-soft); color: var(--amber); }
+    .fam-audio { background: var(--emerald-soft); color: var(--emerald); }
+    .fam-spatial { background: var(--cyan-soft); color: var(--cyan); }
+
+    .specimen-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .specimen-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 10px 18px 13px;
+      border-bottom: 1px solid var(--border);
+      min-height: 54px;
+    }
+
+    .code-toggle {
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .code-toggle:hover,
+    .code-toggle[aria-expanded="true"] {
+      background: var(--vermilion);
+      color: #fff;
+      border-color: var(--vermilion);
+    }
+
+    .stage-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background-color: #0d0d11;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+      background-size: 15px 15px;
+      min-height: 174px;
+      color: #f4f2ed;
+      position: relative;
+    }
+
+    .stage-split::after {
+      content: "VS";
+      position: absolute;
+      top: 56%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 99px;
+      background: #1a1a22;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #a6a29b;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .stage-cell {
+      padding: 14px;
+      padding-top: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      gap: 8px;
+    }
+
+    .stage-cell:first-child {
+      border-right: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+
+    .stage-tag {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.025);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      font-family: var(--font-display);
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      color: #b8b4ad;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+    }
+
+    .stage-tag::after {
+      content: "WITHOUT SKILL";
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #78756f;
+    }
+
+    .stage-tag-active {
+      color: #ffffff;
+      background: rgba(255, 87, 34, 0.11);
+      border-bottom: 1px solid rgba(255, 87, 34, 0.28);
+    }
+
+    .stage-tag-active::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--vermilion);
+      box-shadow: 0 0 8px var(--vermilion);
+      margin-right: 4px;
+    }
+
+    .stage-tag-active::after {
+      content: "WITH SKILL";
+      background: rgba(255, 87, 34, 0.22);
+      color: #ff8a65;
+    }
+
+    .specimen-foot {
+      padding: 9px 16px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .specimen-foot-output {
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .specimen-code {
+      display: none;
+      background: #08080b;
+      border-top: 1px solid var(--border);
+      padding: 14px 18px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.55;
+      color: #d5d2cd;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .specimen-code.open {
+      display: block;
+    }
+
+    /* Demo UI Controls */
+    .ui-btn-flat {
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 8px;
+      background: #23232b;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #a6a29b;
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .ui-btn-juice {
+      height: 36px;
+      padding: 0 15px;
+      border-radius: 8px;
+      background: var(--vermilion);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 6px 16px rgba(255, 87, 34, 0.3);
+      transition: transform 180ms var(--spring-overshoot), background-color 150ms ease;
+      user-select: none;
+    }
+
+    .ui-btn-hold {
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .hold-fill {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: rgba(239, 68, 68, 0.4);
+      pointer-events: none;
+    }
+
+    .hold-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes damped-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-7px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(2px); }
+    }
+
+    .shake-active {
+      animation: damped-shake 340ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+      border-color: var(--danger) !important;
+      background: rgba(239, 68, 68, 0.2) !important;
+    }
+
+    .switch-track {
+      width: 52px;
+      height: 28px;
+      border-radius: 99px;
+      background: #252530;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: background-color 160ms ease;
+    }
+
+    .switch-track.on {
+      background: var(--indigo);
+    }
+
+    .switch-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 220ms var(--spring-overshoot);
+      transform-origin: center;
+    }
+
+    .switch-track.on .switch-thumb {
+      transform: translateX(24px);
+    }
+
+    .switch-track.flat-switch .switch-thumb {
+      transition: transform 150ms linear;
+    }
+
+    .counter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1c1c24;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      padding: 4px 9px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #f4f2ed;
+    }
+
+    .counter-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: #282834;
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--font-mono);
+    }
+
+    .odo-val {
+      display: inline-block;
+      min-width: 24px;
+      text-align: center;
+      transition: transform 180ms var(--spring-overshoot);
+    }
+
+    /* UPGRADED DEMO 07: Detent Slider with Floating Bubble & Notch Dots */
+    .detent-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 136px;
+    }
+
+    .detent-bubble {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #23232d;
+      color: #a6a29b;
+      transition: transform 160ms var(--spring-overshoot), background-color 140ms ease, color 140ms ease;
+    }
+
+    .detent-bubble.juice-bubble {
+      background: var(--emerald-soft);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .detent-notches {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 6px;
+    }
+
+    .detent-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #343442;
+      transition: transform 150ms var(--spring-overshoot), background-color 150ms ease;
+    }
+
+    .detent-dot.lit {
+      background: var(--emerald);
+      transform: scale(1.45);
+    }
+
+    /* UPGRADED DEMO 10: Coyote Time Menu with Air Gap & Grace Progress Bar */
+    .coyote-zone {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .coyote-popup {
+      position: absolute;
+      bottom: calc(100% + 10px); /* 10px intentional air gap that kills non-Coyote menus! */
+      left: 50%;
+      transform: translateX(-50%) translateY(6px) scale(0.95);
+      background: #1e1e28;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 9px;
+      padding: 7px 10px;
+      width: 148px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 120ms ease, transform 160ms var(--spring-snappy);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .coyote-popup.open {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .coyote-action-btn {
+      width: 100%;
+      height: 26px;
+      border-radius: 5px;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .coyote-action-btn:hover {
+      background: var(--amber);
+      color: #0b0b0e;
+    }
+
+    .coyote-bar-track {
+      height: 3px;
+      width: 100%;
+      background: #2d2d3a;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .coyote-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: var(--amber);
+      transition: width 450ms linear;
+    }
+
+    /* UPGRADED DEMO 12: AI Stream Terminal Screen */
+    .stream-box {
+      width: 148px;
+      height: 44px;
+      background: #08080b;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 7px;
+      padding: 6px 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      line-height: 1.35;
+      color: #d5d2cd;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+
+    .token-word {
+      display: inline-block;
+      animation: tokenPop 180ms var(--spring-overshoot) forwards;
+    }
+
+    @keyframes tokenPop {
+      0% { opacity: 0; transform: translateY(4px) scale(0.92); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .stream-cursor {
+      display: inline-block;
+      width: 6px;
+      height: 11px;
+      border-radius: 3px;
+      background: var(--emerald);
+      vertical-align: middle;
+    }
+
+    .tilt-card {
+      width: 132px;
+      height: 70px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #232332, #15151e);
+      border: 1px solid rgba(99, 102, 241, 0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: #f4f2ed;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      transform-style: preserve-3d;
+    }
+
+    .tilt-glare {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 150ms ease;
+    }
+
+    /* =====================================================================
+       SECTION 3: THE 120MS THESIS
+       ===================================================================== */
+    .thesis-section {
+      padding: 36px 0 48px;
+    }
+
+    .thesis-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 820px) {
+      .thesis-compare {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .thesis-card {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .thesis-card.ours {
+      border-color: rgba(255, 87, 34, 0.4);
+    }
+
+    .thesis-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .thesis-card.ours .thesis-badge {
+      color: var(--vermilion);
+    }
+
+    .timeline-diagram {
+      background: #0d0d11;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: #d5d2cd;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tl-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tl-seg {
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* =====================================================================
+       SECTION 4: THREE WORKFLOWS TABLE
+       ===================================================================== */
+    .workflows-section {
+      padding: 36px 0 72px;
+    }
+
+    .workflows-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .wf-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .wf-table th,
+    .wf-table td {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .wf-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .wf-table thead th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      background: var(--surface-2);
+    }
+
+    .wf-mode {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .wf-mode span {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--vermilion);
+      margin-top: 3px;
+    }
+
+    .wf-prompt {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--text);
+      background: var(--surface-2);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+
+    .wf-result {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.58;
+    }
+
+    @media (max-width: 780px) {
+      .wf-table thead { display: none; }
+      .wf-table tr { display: block; border-bottom: 1px solid var(--border); padding: 14px 0; }
+      .wf-table td { display: block; border: none; padding: 8px 18px; }
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 0 56px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--vermilion);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Studio Header -->
+  <div class="topbar-wrap">
+    <header class="topbar">
+      <a href="#" class="brand">
+        <span class="brand-seal">GF</span>
+        <span>game-feel-ui</span>
+      </a>
+      <nav class="topbar-nav">
+        <a href="#sandbox" data-i18n="navLab">Interactive Sandbox (12)</a>
+        <a href="#thesis" data-i18n="navThesis">The 120ms Thesis</a>
+        <a href="#workflows" data-i18n="navWorkflows">Agent Workflows</a>
+        <a href="install.html" style="color:var(--vermilion);font-weight:600;" data-i18n="navInstall">Install Tutorial →</a>
+      </nav>
+      <div class="topbar-controls">
+        <button id="soundToggle" class="pill-btn" type="button" title="Toggle Web Audio Synthesizer">
+          <span id="soundDot" style="width:7px;height:7px;border-radius:50%;background:#10b981;"></span>
+          <span id="soundLabel">Audio: ON</span>
+        </button>
+        <button id="themeToggle" class="pill-btn" type="button" title="Switch Dark Studio / Warm Paper theme">
+          <span>◐</span>
+          <span id="themeLabel">Paper</span>
+        </button>
+        <div class="lang-switch" role="group" aria-label="Language selector">
+          <button type="button" class="lang-btn active" data-lang="en">EN</button>
+          <button type="button" class="lang-btn" data-lang="pt">PT</button>
+        </div>
+        <a href="https://github.com/e-fiuza/game-feel-ui" target="_blank" rel="noopener" class="pill-btn">
+          ★ GitHub ↗
+        </a>
+      </div>
+    </header>
+  </div>
+
+  <main>
+    <!-- =====================================================================
+         SECTION 1: HERO SPLIT + SLOW-MOTION COMPARISON STAGE
+         ===================================================================== -->
+    <section class="hero container">
+      <div class="hero-grid">
+        <!-- Left Column -->
+        <div>
+          <div class="eyebrow-pill">
+            <span class="eyebrow-dot"></span>
+            <span data-i18n="eyebrow">OPEN-SOURCE AGENT SKILL · 39 MECHANICS · 0 KB AUDIO ASSETS</span>
+          </div>
+          <h1 data-i18n="heroTitle">Make interfaces feel <em>physical</em> in the first 120ms.</h1>
+          <p class="hero-lead" data-i18n="heroLead">
+            AI-generated frontends work, but often feel flat and static. <code>game-feel-ui</code> spots dull interactions in your app and makes your UI feel <strong>dynamic, fluid, and attractive</strong> using subtle, proven physics from game development—<strong>Squash &amp; Stretch</strong>, <strong>Hitstop</strong>, <strong>Coyote Time forgiveness</strong>, and <strong>0 KB Web Audio</strong>.
+          </p>
+
+          <div id="installBtn" class="terminal-card" role="button" tabindex="0" aria-label="Copy npx install command" style="margin-bottom:12px;">
+            <div class="terminal-cmd">
+              <span class="terminal-prompt">$</span>
+              <span>npx skills add e-fiuza/game-feel-ui</span>
+            </div>
+            <span id="copyBadge" class="terminal-copy" data-i18n="copyBtn">Copy</span>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <a href="install.html" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:12.5px;font-weight:600;color:var(--vermilion);text-decoration:none;padding:6px 12px;border-radius:8px;background:var(--vermilion-soft);border:1px solid rgba(255,87,34,0.3);" data-i18n="heroInstallGuideLink">
+              📖 Step-by-Step Installation &amp; Usage Tutorial →
+            </a>
+          </div>
+
+          <div class="agent-strip">
+            <span data-i18n="worksWith">Works with:</span>
+            <span class="agent-badge">Claude Code</span>
+            <span class="agent-badge">Cursor</span>
+            <span class="agent-badge">Codex</span>
+            <span class="agent-badge">Windsurf</span>
+            <span class="agent-badge">Gemini CLI</span>
+          </div>
+        </div>
+
+        <!-- Right Column: Slow-Motion Stacked Comparison Microscope -->
+        <div class="slowmo-card">
+          <div class="slowmo-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="window-dots">
+                <span style="background:#ff5f57"></span>
+                <span style="background:#ffbd2e"></span>
+                <span style="background:#28c840"></span>
+              </div>
+              <span style="font-family:var(--font-mono);font-size:11px;color:#a6a29b;" data-i18n="heroStageTitle">SQUASH &amp; STRETCH COMPARISON</span>
+            </div>
+
+            <div class="speed-pills">
+              <button type="button" id="speedSlowBtn" class="speed-btn active" data-speed="slow">0.25x Slow-Mo</button>
+              <button type="button" id="speedRealBtn" class="speed-btn" data-speed="real">1x Real-Time</button>
+            </div>
+          </div>
+
+          <div class="slowmo-tracks">
+            <!-- Top Lane: Without Skill -->
+            <div class="comp-lane">
+              <div class="lane-info">
+                <span class="lane-badge" data-i18n="laneFlatTitle">Standard UI</span>
+                <span class="lane-sub" data-i18n="laneFlatSub">Rigid linear slide (Zero deformation)</span>
+              </div>
+              <div id="heroFlatSwitch" class="hero-switch" role="switch" aria-checked="false" aria-label="Standard CSS Toggle">
+                <div id="heroFlatThumb" class="hero-thumb"></div>
+              </div>
+            </div>
+
+            <!-- Bottom Lane: With game-feel-ui -->
+            <div class="comp-lane juice-lane">
+              <div class="lane-info">
+                <span class="lane-badge" data-i18n="laneJuiceTitle">Game Feel UI</span>
+                <span class="lane-sub" data-i18n="laneJuiceSub">Preload squash → Mid-air stretch (1.42x) → Overshoot</span>
+              </div>
+              <div id="heroJuiceSwitch" class="hero-switch" role="switch" aria-checked="false" aria-label="Game Feel Toggle">
+                <div id="heroJuiceThumb" class="hero-thumb"></div>
+              </div>
+            </div>
+
+            <!-- 4 Phase Callouts that light up during animation -->
+            <div class="phase-strip">
+              <div id="hp1" class="phase-pill" data-i18n="hp1">1. Preload 0.85x</div>
+              <div id="hp2" class="phase-pill" data-i18n="hp2">2. Stretch 1.42x</div>
+              <div id="hp3" class="phase-pill" data-i18n="hp3">3. Overshoot +10px</div>
+              <div id="hp4" class="phase-pill" data-i18n="hp4">4. Spring Settle ✓</div>
+            </div>
+          </div>
+
+          <div class="slowmo-footer">
+            <button type="button" id="heroRunDemoBtn" class="run-demo-btn">
+              <span>▶</span>
+              <span data-i18n="runDemoBtn">Run Comparison Demo</span>
+            </button>
+            <a href="#sandbox" class="more-demos-link" data-i18n="seeMoreDemos">See 12 more demos ↓</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SECTION 2: INTERACTIVE SANDBOX (12 A/B COMPARISONS)
+         ===================================================================== -->
+    <section id="sandbox" class="lab-section container">
+      <span class="section-kicker" data-i18n="labKicker">INTERACTIVE SANDBOX</span>
+      <h2 class="section-heading" data-i18n="labTitle">Test 12 Game-Feel Mechanics <em>Live</em></h2>
+      <p class="section-desc" data-i18n="labSub">
+        Interact with both sides of each card below to feel the difference between standard linear UI (left) and calibrated Game Feel (right).
+      </p>
+
+      <div class="filter-tabs" role="tablist">
+        <button type="button" class="filter-tab active" data-filter="all" data-i18n="tabAll">All (12)</button>
+        <button type="button" class="filter-tab" data-filter="impact" data-i18n="tabImpact">Impact &amp; Hitstop</button>
+        <button type="button" class="filter-tab" data-filter="spring" data-i18n="tabSpring">Spring &amp; Morph</button>
+        <button type="button" class="filter-tab" data-filter="coyote" data-i18n="tabCoyote">Coyote Forgiveness</button>
+        <button type="button" class="filter-tab" data-filter="audio" data-i18n="tabAudio">Audio &amp; Cadence</button>
+        <button type="button" class="filter-tab" data-filter="spatial" data-i18n="tabSpatial">Spatial &amp; 3D</button>
+      </div>
+
+      <div class="specimens-grid">
+        <!-- 01: Hitstop & Spring -->
+        <article class="specimen" data-cat="impact">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-impact">01 · M01 + M04 · IMPACT &amp; HITSTOP</span>
+              <h3 class="specimen-title" data-i18n="s1Title">Primary Action Compression &amp; Freeze</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code1" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s1Desc">Compresses to <code>0.92</code> on pointerdown, holds a 75ms freeze-frame on release, then rebounds with spring overshoot.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <button id="s1Flat" type="button" class="ui-btn-flat">Deploy</button>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <button id="s1Juice" type="button" class="ui-btn-juice">
+                <span id="s1Icon">↑</span>
+                <span id="s1Text">Deploy</span>
+              </button>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log1" class="specimen-foot-output">Click both buttons to compare response</span>
+          </div>
+          <pre id="code1" class="specimen-code">onPointerDown: () => el.style.transform = 'scale(0.92)',
+onPointerUp: async () => {
+  await sleep(75); // Hitstop freeze-frame
+  el.style.transform = 'scale(1.08)';
+  playHarmonicTriad();
+}</pre>
+        </article>
+
+        <!-- 02: Hold to Commit -->
+        <article class="specimen" data-cat="impact coyote">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-coyote">02 · M21 · TENSION &amp; FORGIVENESS</span>
+              <h3 class="specimen-title" data-i18n="s2Title">Hold-to-Commit Destructive Action</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code2" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s2Desc">Replaces confirmation modals with a physical hold gauge, rising pitch tension, and reversible decay on early release.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <button id="s2Flat" type="button" class="ui-btn-flat">Delete Key</button>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <button id="s2Juice" type="button" class="ui-btn-hold">
+                <div id="s2Fill" class="hold-fill"></div>
+                <span id="s2Text" class="hold-text">Hold to Delete</span>
+              </button>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log2" class="specimen-foot-output">Press and hold the right button for 900ms</span>
+          </div>
+          <pre id="code2" class="specimen-code">progress = Math.min(100, progress + dt * 0.11);
+oscillator.frequency.value = 220 + progress * 3.5;
+button.style.transform = `translate(${jitter}px, 0) scale(0.97)`;</pre>
+        </article>
+
+        <!-- 03: Combo Checklist Pitch Escalation (With Visual Combo Badge) -->
+        <article class="specimen" data-cat="audio">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-audio">03 · M20 · AUDIO &amp; CADENCE</span>
+              <h3 class="specimen-title" data-i18n="s3Title">Combo Checklist Pitch Escalation</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code3" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s3Desc">Each consecutive click ascends +2 semitones (<code>440 * 2^(n/12)</code>) and escalates the visual combo multiplier.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <div style="display:flex;gap:6px;">
+                <button type="button" class="ui-btn-flat flat-step">1</button>
+                <button type="button" class="ui-btn-flat flat-step">2</button>
+                <button type="button" class="ui-btn-flat flat-step">3</button>
+              </div>
+              <span style="font-family:var(--font-mono);font-size:10px;color:#585651;">No streak feedback</span>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <div style="display:flex;gap:6px;">
+                <button type="button" class="ui-btn-juice juice-step" data-step="0">1</button>
+                <button type="button" class="ui-btn-juice juice-step" data-step="1">2</button>
+                <button type="button" class="ui-btn-juice juice-step" data-step="2">3</button>
+              </div>
+              <span id="s3ComboBadge" style="font-family:var(--font-mono);font-size:10.5px;padding:2px 8px;border-radius:5px;background:#1e1e28;color:#a6a29b;transition:transform 160ms var(--spring-overshoot);">Streak: 0x</span>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log3" class="specimen-foot-output">Click 1 → 2 → 3 on the right in sequence</span>
+          </div>
+          <pre id="code3" class="specimen-code">const freq = 440 * Math.pow(2, (streakIndex * 2) / 12);
+playSynthTick(freq, { durationMs: 45, waveform: 'triangle' });</pre>
+        </article>
+
+        <!-- 04: Physical Validation Resistance -->
+        <article class="specimen" data-cat="impact">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-impact">04 · M11 · IMPACT &amp; RECOIL</span>
+              <h3 class="specimen-title" data-i18n="s4Title">Physical Validation Resistance</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code4" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s4Desc">Invalid input triggers a horizontal damped harmonic shake (<code>±7px → 0px</code>) paired with a 140Hz sub-bass thud.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <button type="button" id="s4FlatBtn" class="ui-btn-flat">Submit Invalid</button>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <button type="button" id="s4JuiceBtn" class="ui-btn-juice">Submit Invalid</button>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log4" class="specimen-foot-output">Click Submit Invalid to feel recoil</span>
+          </div>
+          <pre id="code4" class="specimen-code">@keyframes damped-shake {
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(2px); }
+}</pre>
+        </article>
+
+        <!-- 05: Squash & Stretch Toggle Switch -->
+        <article class="specimen" data-cat="spring">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-spring">05 · M09 · SPRING &amp; MORPH</span>
+              <h3 class="specimen-title" data-i18n="s7Title">Squash &amp; Stretch Toggle Switch</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code7" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s7Desc">The thumb elongates horizontally (<code>scaleX(1.32)</code>) mid-flight and settles with spring overshoot.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <div id="s7Flat" class="switch-track flat-switch"><div class="switch-thumb"></div></div>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <div id="s7Juice" class="switch-track"><div id="s7Thumb" class="switch-thumb"></div></div>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log7" class="specimen-foot-output">Toggle both switches to feel thumb deformation</span>
+          </div>
+          <pre id="code7" class="specimen-code">thumb.style.transform = isOn
+  ? 'translateX(24px) scaleX(1.32) scaleY(0.82)'
+  : 'translateX(0px) scaleX(1.32) scaleY(0.82)';</pre>
+        </article>
+
+        <!-- 06: Kinetic Odometer Number Roll -->
+        <article class="specimen" data-cat="spring audio">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-spring">06 · M23 · SPRING &amp; CADENCE</span>
+              <h3 class="specimen-title" data-i18n="s8Title">Kinetic Odometer Number Roll</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code8" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s8Desc">Numbers roll vertically with directional momentum and pitch-matched ticks instead of swapping abruptly.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <div class="counter-pill">
+                <button type="button" class="counter-btn" id="s8FlatDec">−</button>
+                <span id="s8FlatVal">12</span>
+                <button type="button" class="counter-btn" id="s8FlatInc">+</button>
+              </div>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <div class="counter-pill">
+                <button type="button" class="counter-btn" id="s8JuiceDec">−</button>
+                <span id="s8JuiceVal" class="odo-val">12</span>
+                <button type="button" class="counter-btn" id="s8JuiceInc">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log8" class="specimen-foot-output">Click + and − to compare vertical momentum</span>
+          </div>
+          <pre id="code8" class="specimen-code">valEl.style.transform = `translateY(${dir * -10}px) scale(1.18)`;
+requestAnimationFrame(() => valEl.style.transform = 'translateY(0) scale(1)');</pre>
+        </article>
+
+        <!-- 07: Stepped Detent Slider (UPGRADED WITH FLOATING POP BUBBLE & NOTCH DOTS) -->
+        <article class="specimen" data-cat="audio spatial">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-audio">07 · M25 · AUDIO &amp; DETENTS</span>
+              <h3 class="specimen-title" data-i18n="s9Title">Stepped Detent Slider with Pitch Ticks</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code9" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s9Desc">Each step pops the floating value badge with spring physics, lights physical notch detents, and plays a frequency-scaled rotary tick.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <div class="detent-wrap">
+                <span id="s9FlatBubble" class="detent-bubble">Level 3</span>
+                <input type="range" min="1" max="5" step="1" value="3" style="width:128px;" id="s9Flat" />
+              </div>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <div id="s9JuiceWrap" class="detent-wrap">
+                <span id="s9JuiceBubble" class="detent-bubble juice-bubble">Level 3 · 640Hz</span>
+                <input type="range" min="1" max="5" step="1" value="3" style="width:128px;accent-color:var(--emerald);" id="s9Juice" />
+                <div class="detent-notches" id="s9Notches">
+                  <span class="detent-dot lit"></span>
+                  <span class="detent-dot lit"></span>
+                  <span class="detent-dot lit"></span>
+                  <span class="detent-dot"></span>
+                  <span class="detent-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log9" class="specimen-foot-output">Drag both sliders across steps 1–5</span>
+          </div>
+          <pre id="code9" class="specimen-code">slider.addEventListener('input', e => {
+  badge.style.transform = 'translateY(-4px) scale(1.25)';
+  playRotaryTick(400 + Number(e.target.value) * 80, { durationMs: 12 });
+});</pre>
+        </article>
+
+        <!-- 08: Optimistic Archive + 4s Undo Grace (UPGRADED WITH BLOCKING MODAL VS LIVE COUNTDOWN) -->
+        <article class="specimen" data-cat="coyote">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-coyote">08 · M19 · COYOTE FORGIVENESS</span>
+              <h3 class="specimen-title" data-i18n="s10Title">Optimistic Archive + 4s Undo Grace</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code10" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s10Desc">Standard UI interrupts you with a confirmation dialog; Game Feel archives in 0ms with a reversible 4s countdown pill.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <button type="button" id="s10Flat" class="ui-btn-flat">Archive Row</button>
+              <div id="s10Modal" style="display:none;background:#1e1e28;border:1px solid #ef4444;border-radius:7px;padding:6px 10px;font-size:11px;text-align:center;">
+                <div style="margin-bottom:4px;color:#fca5a5;">Are you sure?</div>
+                <button type="button" id="s10ModalCancel" class="ui-btn-flat" style="height:22px;padding:0 8px;font-size:10px;">Cancel</button>
+              </div>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <button type="button" id="s10Juice" class="ui-btn-juice">Archive Row</button>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log10" class="specimen-foot-output">Click Archive Row on both sides</span>
+          </div>
+          <pre id="code10" class="specimen-code">hideRowOptimistically(id);
+const commitTimer = setTimeout(() => api.delete(id), 4000);
+onUndoClick(() => { clearTimeout(commitTimer); restoreRow(id); });</pre>
+        </article>
+
+        <!-- 09: Magnetic Cursor Gravity -->
+        <article class="specimen" data-cat="spatial">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-spatial">09 · M26 · SPATIAL &amp; PROXIMITY</span>
+              <h3 class="specimen-title" data-i18n="s5Title">Magnetic Cursor Gravity</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code5" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s5Desc">Pulls the button up to <code>6px</code> toward the pointer vector on hover and snaps back elastically on leave.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <button type="button" class="ui-btn-flat">Hover Target</button>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <button type="button" id="s5JuiceBtn" class="ui-btn-juice">Hover Target</button>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log5" class="specimen-foot-output">Move cursor across the right button</span>
+          </div>
+          <pre id="code5" class="specimen-code">const dx = (e.clientX - centerX) * 0.32;
+const dy = (e.clientY - centerY) * 0.32;
+btn.style.transform = `translate(${dx}px, ${dy}px)`;</pre>
+        </article>
+
+        <!-- 10: Coyote Time Hover Grace (UPGRADED WITH CLICKABLE SUBMENU ACROSS AIR GAP) -->
+        <article class="specimen" data-cat="coyote">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-coyote">10 · M15 · COYOTE FORGIVENESS</span>
+              <h3 class="specimen-title" data-i18n="s6Title">Coyote Grace Window on Hover Menus</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code6" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s6Desc">Try hovering each trigger and moving your mouse up across the gap to click <strong>⚡ Copy Key</strong> inside the popup.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <div class="coyote-zone" id="s6FlatZone">
+                <div id="s6FlatPopup" class="coyote-popup">
+                  <button type="button" class="coyote-action-btn">⚡ Copy Key</button>
+                </div>
+                <button type="button" id="s6FlatTrigger" class="ui-btn-flat">Hover Menu ▴</button>
+              </div>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <div class="coyote-zone" id="s6JuiceZone">
+                <div id="s6JuicePopup" class="coyote-popup">
+                  <button type="button" id="s6JuiceAction" class="coyote-action-btn">⚡ Copy Key</button>
+                  <div class="coyote-bar-track"><div id="s6JuiceBar" class="coyote-bar-fill"></div></div>
+                </div>
+                <button type="button" id="s6JuiceTrigger" class="ui-btn-juice">Hover Menu ▴</button>
+              </div>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log6" class="specimen-foot-output">Hover trigger, then move mouse up to click Copy Key!</span>
+          </div>
+          <pre id="code6" class="specimen-code">// 0ms menu snaps shut in the 10px gap; Coyote buffer keeps it open
+onMouseLeave: () => closeTimer = setTimeout(close, 450),
+onMouseEnter: () => clearTimeout(closeTimer)</pre>
+        </article>
+
+        <!-- 11: 3D Perspective Tilt -->
+        <article class="specimen" data-cat="spatial">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-spatial">11 · M24 · SPATIAL &amp; 3D</span>
+              <h3 class="specimen-title" data-i18n="s11Title">3D Perspective Tilt &amp; Specular Glare</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code11" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s11Desc">Rotates card subtly in 3D space (<code>rotateX/rotateY ±10deg</code>) with a specular light highlight tracking the pointer.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <div class="tilt-card"><span>PRO TIER</span></div>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <div id="s11Card" class="tilt-card">
+                <div id="s11Glare" class="tilt-glare"></div>
+                <span>PRO TIER</span>
+              </div>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log11" class="specimen-foot-output">Move pointer over the right card</span>
+          </div>
+          <pre id="code11" class="specimen-code">card.style.transform = `perspective(420px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;</pre>
+        </article>
+
+        <!-- 12: AI Stream Cadence & Completion Chord (UPGRADED WITH LIVE STREAM TERMINAL) -->
+        <article class="specimen" data-cat="audio spring">
+          <div class="specimen-head">
+            <div>
+              <span class="fam-pill fam-audio">12 · M31 · AUDIO &amp; AI STREAMING</span>
+              <h3 class="specimen-title" data-i18n="s12Title">AI Stream Cadence &amp; Completion Chord</h3>
+            </div>
+            <button class="code-toggle" type="button" data-code="code12" aria-expanded="false">&lt;/&gt; Code</button>
+          </div>
+          <p class="specimen-desc" data-i18n="s12Desc">Compares jerky chunk dumping against smooth token pop-in, glowing cursor morph, throttled ticks, and completion spring.</p>
+          <div class="stage-split">
+            <div class="stage-cell">
+              <span class="stage-tag">Standard UI</span>
+              <div id="s12FlatBox" class="stream-box"><span style="color:#585651;">Click Run below...</span></div>
+              <button type="button" id="s12Flat" class="ui-btn-flat" style="height:28px;font-size:11.5px;">Run Stream</button>
+            </div>
+            <div class="stage-cell">
+              <span class="stage-tag stage-tag-active">Game Feel UI</span>
+              <div id="s12JuiceBox" class="stream-box"><span style="color:#78756f;">Click Run below...</span></div>
+              <button type="button" id="s12Juice" class="ui-btn-juice" style="height:28px;font-size:11.5px;">Run Stream</button>
+            </div>
+          </div>
+          <div class="specimen-foot">
+            <span>telemetry</span>
+            <span id="log12" class="specimen-foot-output">Click Run Stream on both sides to see token cadence</span>
+          </div>
+          <pre id="code12" class="specimen-code">// Smooth token pop-in + throttled 65ms synth tick + completion triad
+tokenSpan.className = 'token-word';
+if (now - lastTick > 65) playSoftTick(660 + (idx % 3) * 35);</pre>
+        </article>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SECTION 3: THE 120MS THESIS
+         ===================================================================== -->
+    <section id="thesis" class="thesis-section container">
+      <span class="section-kicker" data-i18n="thesisKicker">THE INTERACTION THESIS</span>
+      <h2 class="section-heading" data-i18n="thesisTitle">Most AI agents ship <em>lifeless</em> transitions. We engineer kinetic cascades.</h2>
+      <p class="section-desc" data-i18n="thesisDesc">
+        When you ask a vanilla LLM to polish an interface, it adds <code>transition: all 0.3s ease</code>. Real Game Feel coordinates four sensory layers within 120 milliseconds.
+      </p>
+
+      <div class="thesis-compare">
+        <div class="thesis-card">
+          <span class="thesis-badge" data-i18n="themBadge">TYPICAL AI OUTPUT · LINEAR &amp; PUNISHING</span>
+          <div class="timeline-diagram">
+            <div class="tl-bar">
+              <div class="tl-seg" style="width:100%;background:#2b2b36;color:#8e8b84;">transition: all 300ms ease-in-out (Sluggish &amp; Silent)</div>
+            </div>
+            <div style="color:#8e8b84;" data-i18n="them1">✗ Zero pointerdown compression (button feels like a flat image)</div>
+            <div style="color:#8e8b84;" data-i18n="them2">✗ Interrupts user workflow with blocking <code>window.confirm()</code> modals</div>
+            <div style="color:#8e8b84;" data-i18n="them3">✗ Dropdown menus snap shut in <code>0ms</code> on diagonal mouse paths</div>
+          </div>
+        </div>
+
+        <div class="thesis-card ours">
+          <span class="thesis-badge" data-i18n="usBadge">WITH GAME-FEEL-UI · CALIBRATED KINETIC CASCADE</span>
+          <div class="timeline-diagram">
+            <div class="tl-bar">
+              <div class="tl-seg" style="width:24%;background:var(--amber);color:#0b0b0e;">Squash 0.94</div>
+              <div class="tl-seg" style="width:22%;background:var(--vermilion);">Hitstop 65ms</div>
+              <div class="tl-seg" style="width:32%;background:var(--indigo);">Spring 1.05x</div>
+              <div class="tl-seg" style="width:22%;background:var(--emerald);color:#0b0b0e;">Triad Synth</div>
+            </div>
+            <div style="color:#f4f2ed;" data-i18n="us1">✓ Physical preload on <code>pointerdown</code> + frame-freeze impact on release</div>
+            <div style="color:#f4f2ed;" data-i18n="us2">✓ Modal-free <strong>Hold-to-Commit</strong> tension &amp; 4s Optimistic Undo windows</div>
+            <div style="color:#f4f2ed;" data-i18n="us3">✓ Invisible <strong>160ms Coyote Time</strong> forgiveness on menus &amp; hitboxes</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SECTION 4: THREE WORKFLOWS TABLE (GENJUTSU STYLE)
+         ===================================================================== -->
+    <section id="workflows" class="workflows-section container">
+      <span class="section-kicker" data-i18n="wfKicker">AGENTIC WORKFLOWS</span>
+      <h2 class="section-heading" style="margin-bottom:6px;" data-i18n="wfTitle">Three ways to use <em>game-feel-ui</em></h2>
+      <p class="section-desc" data-i18n="wfSub">
+        Just describe what you want in Claude Code, Cursor, or Codex—or trigger the deterministic CLI modes directly.
+      </p>
+
+      <div class="workflows-table-wrap">
+        <table class="wf-table">
+          <thead>
+            <tr>
+              <th data-i18n="thScale">Scale / Mode</th>
+              <th data-i18n="thPrompt">What you type in your agent</th>
+              <th data-i18n="thResult">What you get in your codebase</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="wf-mode">
+                01 · Component Polish
+                <span>BM25 + 11 Stacks</span>
+              </td>
+              <td>
+                <code class="wf-prompt">"Replace our Delete Key confirm modal with a Game Feel hold-to-commit button and Coyote Time menu."</code>
+              </td>
+              <td class="wf-result" data-i18n="wf1Res">
+                Queries 39 mechanics and 11 stack guides (React, Next.js, Framer Motion, Tailwind, Vue, Svelte, Mobile) to drop in 60fps compositor-safe code with <code>prefers-reduced-motion</code> fallbacks.
+              </td>
+            </tr>
+            <tr>
+              <td class="wf-mode">
+                02 · Codebase Audit
+                <span>--audit ./src</span>
+              </td>
+              <td>
+                <code class="wf-prompt">"Audit our dashboard with game-feel-ui and fix the top 3 dead interactions."</code>
+              </td>
+              <td class="wf-result" data-i18n="wf2Res">
+                Scans your repository for dead clicks, blocking <code>window.confirm()</code> calls, and layout-thrashing animations, returning a <strong>0–100 Juice Score</strong> with exact <code>file:line</code> fixes.
+              </td>
+            </tr>
+            <tr>
+              <td class="wf-mode">
+                03 · System Blueprint
+                <span>--blueprint --persist</span>
+              </td>
+              <td>
+                <code class="wf-prompt">"Generate a B2B SaaS Game Feel blueprint with juice 5, forgiveness 8, audio 3."</code>
+              </td>
+              <td class="wf-result" data-i18n="wf3Res">
+                Calibrates all CSS Custom Properties (<code>--gf-press-scale</code>, <code>--gf-hitstop-ms</code>, <code>--gf-coyote-grace-ms</code>) and saves your team's contract to <code>game-feel-system/MASTER.md</code>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <span>game-feel-ui · MIT License · Built by Eduardo Fiuza</span>
+      <span>
+        <a href="install.html" style="color:var(--vermilion);font-weight:600;">Install &amp; Usage Tutorial</a>
+        &nbsp;·&nbsp;
+        <a href="https://github.com/e-fiuza/game-feel-ui" target="_blank" rel="noopener">GitHub Repository</a>
+        &nbsp;·&nbsp;
+        <a href="https://github.com/e-fiuza/game-feel-ui/blob/main/SKILL.md" target="_blank" rel="noopener">SKILL.md</a>
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // 1. THEME SWITCHER (DARK STUDIO <-> WARM PAPER)
+    // =========================================================================
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    function updateThemeUI() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      themeLabel.textContent = current === 'dark' ? 'Paper' : 'Dark';
+    }
+    updateThemeUI();
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('gf:theme', next); } catch (e) {}
+      updateThemeUI();
+      playTick(860, 0.012);
+    });
+
+    // =========================================================================
+    // 2. PROCEDURAL WEB AUDIO ENGINE (0 KB EXTERNAL ASSETS)
+    // =========================================================================
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function getCtx() {
+      if (!soundEnabled) return null;
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTick(freq = 900, duration = 0.018, gainVal = 0.04) {
+      const c = getCtx();
+      if (!c) return;
+      const now = c.currentTime;
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.45, now + duration);
+      g.gain.setValueAtTime(gainVal, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      osc.connect(g).connect(c.destination);
+      osc.start(now);
+      osc.stop(now + duration);
+    }
+
+    function playTriad() {
+      const c = getCtx();
+      if (!c) return;
+      [523.25, 659.25, 783.99].forEach((f, idx) => {
+        const now = c.currentTime + idx * 0.032;
+        const osc = c.createOscillator();
+        const g = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now);
+        g.gain.setValueAtTime(0.04, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+        osc.connect(g).connect(c.destination);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      });
+    }
+
+    function playErrorThud() {
+      const c = getCtx();
+      if (!c) return;
+      const now = c.currentTime;
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(52, now + 0.14);
+      g.gain.setValueAtTime(0.055, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+      osc.connect(g).connect(c.destination);
+      osc.start(now);
+      osc.stop(now + 0.14);
+    }
+
+    const soundToggle = document.getElementById('soundToggle');
+    const soundDot = document.getElementById('soundDot');
+    const soundLabel = document.getElementById('soundLabel');
+    soundToggle.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundDot.style.background = soundEnabled ? '#10b981' : '#6e6b65';
+      soundLabel.textContent = soundEnabled ? 'Audio: ON' : 'Audio: OFF';
+      if (soundEnabled) playTick(960, 0.012);
+    });
+
+    // Copy npx command
+    const installBtn = document.getElementById('installBtn');
+    const copyBadge = document.getElementById('copyBadge');
+    installBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText('npx skills add e-fiuza/game-feel-ui');
+      playTriad();
+      copyBadge.textContent = 'Copied ✓';
+      copyBadge.style.color = '#10b981';
+      setTimeout(() => {
+        copyBadge.textContent = 'Copy';
+        copyBadge.style.color = '';
+      }, 1500);
+    });
+
+    // =========================================================================
+    // 3. HERO SLOW-MOTION STACKED COMPARISON MICROSCOPE
+    // =========================================================================
+    const heroFlatSwitch = document.getElementById('heroFlatSwitch');
+    const heroFlatThumb = document.getElementById('heroFlatThumb');
+    const heroJuiceSwitch = document.getElementById('heroJuiceSwitch');
+    const heroJuiceThumb = document.getElementById('heroJuiceThumb');
+    const heroRunDemoBtn = document.getElementById('heroRunDemoBtn');
+    const speedSlowBtn = document.getElementById('speedSlowBtn');
+    const speedRealBtn = document.getElementById('speedRealBtn');
+    const hp1 = document.getElementById('hp1');
+    const hp2 = document.getElementById('hp2');
+    const hp3 = document.getElementById('hp3');
+    const hp4 = document.getElementById('hp4');
+
+    let isSlowMo = true;
+    let heroIsOn = false;
+    let heroAnimating = false;
+
+    speedSlowBtn.addEventListener('click', () => {
+      isSlowMo = true;
+      speedSlowBtn.classList.add('active');
+      speedRealBtn.classList.remove('active');
+      runHeroComparison();
+    });
+
+    speedRealBtn.addEventListener('click', () => {
+      isSlowMo = false;
+      speedRealBtn.classList.add('active');
+      speedSlowBtn.classList.remove('active');
+      runHeroComparison();
+    });
+
+    function clearPhasePills() {
+      hp1.className = 'phase-pill';
+      hp2.className = 'phase-pill';
+      hp3.className = 'phase-pill';
+      hp4.className = 'phase-pill';
+    }
+
+    function runHeroComparison(withSound = true) {
+      if (heroAnimating) return;
+      heroAnimating = true;
+      heroIsOn = !heroIsOn;
+      const targetX = heroIsOn ? 102 : 0;
+      const startX = heroIsOn ? 0 : 102;
+      const dir = heroIsOn ? 1 : -1;
+      const mult = isSlowMo ? 4.2 : 1; // 0.25x slow-motion vs 1x real-time
+
+      clearPhasePills();
+
+      // 1. Standard Linear Switch (No preload, no stretch, no overshoot)
+      heroFlatSwitch.classList.toggle('on-flat', heroIsOn);
+      heroFlatThumb.animate(
+        [
+          { transform: `translateX(${startX}px)` },
+          { transform: `translateX(${targetX}px)` }
+        ],
+        { duration: 220 * mult, easing: 'linear', fill: 'forwards' }
+      );
+
+      // 2. Game Feel Switch (Dense continuous velocity curve: zero mid-air pause!)
+      const totalDur = 360 * mult;
+      heroJuiceThumb.animate(
+        [
+          { transform: `translateX(${startX}px) scale(1, 1)`, offset: 0 },
+          { transform: `translateX(${startX - dir * 2.5}px) scale(0.92, 1.08)`, offset: 0.08 },
+          { transform: `translateX(${startX - dir * 5.0}px) scale(0.84, 1.16)`, offset: 0.16 },
+          { transform: `translateX(${startX + dir * 6}px) scale(1.08, 0.93)`, offset: 0.24 },
+          { transform: `translateX(${startX + dir * 28}px) scale(1.32, 0.78)`, offset: 0.33 },
+          { transform: `translateX(${startX + dir * 54}px) scale(1.45, 0.71)`, offset: 0.42 },
+          { transform: `translateX(${startX + dir * 82}px) scale(1.34, 0.77)`, offset: 0.51 },
+          { transform: `translateX(${targetX + dir * 2}px) scale(1.06, 0.95)`, offset: 0.60 },
+          { transform: `translateX(${targetX + dir * 11}px) scale(0.83, 1.18)`, offset: 0.69 },
+          { transform: `translateX(${targetX + dir * 5}px) scale(0.92, 1.08)`, offset: 0.77 },
+          { transform: `translateX(${targetX - dir * 4}px) scale(1.06, 0.95)`, offset: 0.85 },
+          { transform: `translateX(${targetX + dir * 1.5}px) scale(0.99, 1.01)`, offset: 0.93 },
+          { transform: `translateX(${targetX}px) scale(1, 1)`, offset: 1 }
+        ],
+        { duration: totalDur, easing: 'linear', fill: 'forwards' }
+      );
+
+      // Light up Phase Pills & Audio synced to phases
+      hp1.classList.add('lit-1');
+      if (withSound) playTick(420, 0.02, 0.03);
+
+      setTimeout(() => {
+        clearPhasePills();
+        hp2.classList.add('lit-2');
+        heroJuiceSwitch.classList.toggle('on-juice', heroIsOn);
+      }, totalDur * 0.24);
+
+      setTimeout(() => {
+        clearPhasePills();
+        hp3.classList.add('lit-3');
+        if (withSound) playTick(heroIsOn ? 780 : 520, 0.03, 0.045);
+      }, totalDur * 0.65);
+
+      setTimeout(() => {
+        clearPhasePills();
+        hp4.classList.add('lit-4');
+        if (withSound && heroIsOn) playTriad();
+        heroAnimating = false;
+      }, totalDur * 0.92);
+    }
+
+    heroRunDemoBtn.addEventListener('click', () => runHeroComparison(true));
+    heroFlatSwitch.addEventListener('click', () => runHeroComparison(true));
+    heroJuiceSwitch.addEventListener('click', () => runHeroComparison(true));
+
+    // Auto-run once gently on page load so visitors immediately see the slow-mo comparison
+    setTimeout(() => runHeroComparison(false), 650);
+
+    // =========================================================================
+    // 4. INTERACTIVE SANDBOX FILTERING & 12 DEMOS
+    // =========================================================================
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const filter = tab.dataset.filter;
+        playTick(820, 0.01, 0.02);
+        document.querySelectorAll('#sandbox .specimen').forEach(card => {
+          card.setAttribute('data-hidden', filter === 'all' || card.dataset.cat.includes(filter) ? 'false' : 'true');
+        });
+      });
+    });
+
+    document.querySelectorAll('.code-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pre = document.getElementById(btn.dataset.code);
+        const open = pre.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+        playTick(800, 0.01);
+      });
+    });
+
+    // Demo 01: Hitstop
+    const s1Flat = document.getElementById('s1Flat');
+    const s1Juice = document.getElementById('s1Juice');
+    const s1Icon = document.getElementById('s1Icon');
+    const s1Text = document.getElementById('s1Text');
+    const log1 = document.getElementById('log1');
+    s1Flat.addEventListener('click', () => (log1.textContent = 'Standard: scale(1.0) · 0ms hitstop · silent'));
+    s1Juice.addEventListener('pointerdown', () => {
+      s1Juice.style.transform = 'scale(0.91)';
+      playTick(620, 0.012, 0.03);
+      log1.textContent = 'Anticipation: scale(0.91)...';
+    });
+    s1Juice.addEventListener('pointerup', () => {
+      log1.textContent = 'Hitstop 75ms → Spring 1.08x + Triad';
+      setTimeout(() => {
+        s1Juice.style.transform = 'scale(1.08)';
+        s1Juice.style.background = '#10b981';
+        s1Icon.textContent = '✓';
+        s1Text.textContent = 'Deployed';
+        playTriad();
+        setTimeout(() => {
+          s1Juice.style.transform = '';
+          setTimeout(() => {
+            s1Juice.style.background = '';
+            s1Icon.textContent = '↑';
+            s1Text.textContent = 'Deploy';
+          }, 900);
+        }, 180);
+      }, 75);
+    });
+
+    // Demo 02: Hold to Delete
+    const s2Flat = document.getElementById('s2Flat');
+    const s2Juice = document.getElementById('s2Juice');
+    const s2Fill = document.getElementById('s2Fill');
+    const s2Text = document.getElementById('s2Text');
+    const log2 = document.getElementById('log2');
+    let prog2 = 0, raf2 = null;
+    s2Flat.addEventListener('click', () => (log2.textContent = 'Standard: instant delete or blocking modal'));
+    s2Juice.addEventListener('pointerdown', () => {
+      cancelAnimationFrame(raf2);
+      function step() {
+        prog2 = Math.min(100, prog2 + 2.3);
+        s2Fill.style.width = prog2 + '%';
+        const jitter = (Math.random() - 0.5) * (prog2 * 0.05);
+        s2Juice.style.transform = `translate(${jitter.toFixed(1)}px, 0) scale(0.97)`;
+        if (Math.round(prog2) % 14 === 0) playTick(220 + prog2 * 3.5, 0.015, 0.025);
+        log2.textContent = `Charging: ${Math.round(prog2)}% · ${(220 + prog2 * 3.5).toFixed(0)}Hz`;
+        if (prog2 >= 100) {
+          playTriad();
+          s2Juice.style.transform = 'scale(1.06)';
+          s2Text.textContent = 'Deleted ✓';
+          log2.textContent = 'Committed at 100% without modal';
+          setTimeout(() => {
+            prog2 = 0;
+            s2Fill.style.width = '0%';
+            s2Juice.style.transform = '';
+            s2Text.textContent = 'Hold to Delete';
+          }, 1100);
+          return;
+        }
+        raf2 = requestAnimationFrame(step);
+      }
+      raf2 = requestAnimationFrame(step);
+    });
+    function stop2() {
+      cancelAnimationFrame(raf2);
+      function dec() {
+        prog2 = Math.max(0, prog2 - 6);
+        s2Fill.style.width = prog2 + '%';
+        s2Juice.style.transform = '';
+        if (prog2 > 0) raf2 = requestAnimationFrame(dec);
+      }
+      raf2 = requestAnimationFrame(dec);
+    }
+    s2Juice.addEventListener('pointerup', stop2);
+    s2Juice.addEventListener('pointerleave', stop2);
+
+    // Demo 03: Pitch Escalation Steps + Visual Combo Badge
+    const log3 = document.getElementById('log3');
+    const s3ComboBadge = document.getElementById('s3ComboBadge');
+    document.querySelectorAll('.flat-step').forEach(b => b.addEventListener('click', () => (log3.textContent = 'Standard: silent click · 0 combo')));
+    document.querySelectorAll('.juice-step').forEach(b => {
+      b.addEventListener('click', () => {
+        const step = Number(b.dataset.step);
+        const freq = 440 * Math.pow(2, (step * 2) / 12);
+        b.style.transform = 'scale(1.16)';
+        setTimeout(() => (b.style.transform = ''), 160);
+        playTick(freq, 0.045, 0.045);
+
+        s3ComboBadge.textContent = step === 2 ? '🔥 3x MAX COMBO!' : `Streak: ${step + 1}x (+${step * 2} st)`;
+        s3ComboBadge.style.transform = 'scale(1.2)';
+        s3ComboBadge.style.background = step === 2 ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)';
+        s3ComboBadge.style.color = step === 2 ? '#10b981' : '#f59e0b';
+        setTimeout(() => (s3ComboBadge.style.transform = ''), 180);
+
+        if (step === 2) setTimeout(playTriad, 70);
+        log3.textContent = `Step ${step + 1} · ${freq.toFixed(1)}Hz (+${step * 2} semitones)`;
+      });
+    });
+
+    // Demo 04: Error Shake
+    const s4FlatBtn = document.getElementById('s4FlatBtn');
+    const s4JuiceBtn = document.getElementById('s4JuiceBtn');
+    const log4 = document.getElementById('log4');
+    s4FlatBtn.addEventListener('click', () => {
+      s4FlatBtn.style.borderColor = '#ef4444';
+      log4.textContent = 'Standard: static red border · 0 recoil';
+    });
+    s4JuiceBtn.addEventListener('click', () => {
+      s4JuiceBtn.classList.remove('shake-active');
+      void s4JuiceBtn.offsetWidth;
+      s4JuiceBtn.classList.add('shake-active');
+      playErrorThud();
+      log4.textContent = 'Recoil: ±7px damped harmonic shake + 140Hz→52Hz thud';
+    });
+
+    // Demo 05: Squash & Stretch Toggle Switch
+    const s7Flat = document.getElementById('s7Flat');
+    const s7Juice = document.getElementById('s7Juice');
+    const s7Thumb = document.getElementById('s7Thumb');
+    const log7 = document.getElementById('log7');
+    s7Flat.addEventListener('click', () => {
+      s7Flat.classList.toggle('on');
+      log7.textContent = 'Standard: linear thumb translation';
+    });
+    s7Juice.addEventListener('click', () => {
+      const on = s7Juice.classList.toggle('on');
+      s7Thumb.style.transform = on
+        ? 'translateX(24px) scaleX(1.34) scaleY(0.8)'
+        : 'translateX(0px) scaleX(1.34) scaleY(0.8)';
+      playTick(on ? 780 : 480, 0.02, 0.04);
+      log7.textContent = 'Thumb morph: scaleX(1.34) scaleY(0.80) → spring settle';
+      setTimeout(() => (s7Thumb.style.transform = on ? 'translateX(24px)' : 'translateX(0px)'), 150);
+    });
+
+    // Demo 06: Kinetic Odometer
+    let v8Flat = 12, v8Juice = 12;
+    const s8FlatVal = document.getElementById('s8FlatVal');
+    const s8JuiceVal = document.getElementById('s8JuiceVal');
+    const log8 = document.getElementById('log8');
+    document.getElementById('s8FlatInc').addEventListener('click', () => { s8FlatVal.textContent = ++v8Flat; log8.textContent = 'Standard: instant text swap'; });
+    document.getElementById('s8FlatDec').addEventListener('click', () => { s8FlatVal.textContent = --v8Flat; log8.textContent = 'Standard: instant text swap'; });
+    function rollOdo(dir) {
+      v8Juice += dir;
+      s8JuiceVal.style.transform = `translateY(${dir * -10}px) scale(1.2)`;
+      s8JuiceVal.textContent = v8Juice;
+      playTick(dir > 0 ? 760 : 520, 0.016, 0.035);
+      log8.textContent = `Odometer roll: translateY(${dir * -10}px) → spring settle`;
+      setTimeout(() => (s8JuiceVal.style.transform = 'translateY(0) scale(1)'), 140);
+    }
+    document.getElementById('s8JuiceInc').addEventListener('click', () => rollOdo(1));
+    document.getElementById('s8JuiceDec').addEventListener('click', () => rollOdo(-1));
+
+    // Demo 07: Upgraded Detent Slider (Pop Bubble + Notch Dots + Track Recoil + Pitch Tick)
+    const s9Flat = document.getElementById('s9Flat');
+    const s9FlatBubble = document.getElementById('s9FlatBubble');
+    const s9Juice = document.getElementById('s9Juice');
+    const s9JuiceBubble = document.getElementById('s9JuiceBubble');
+    const s9JuiceWrap = document.getElementById('s9JuiceWrap');
+    const s9Dots = document.querySelectorAll('#s9Notches .detent-dot');
+    const log9 = document.getElementById('log9');
+
+    s9Flat.addEventListener('input', () => {
+      s9FlatBubble.textContent = `Level ${s9Flat.value}`;
+      log9.textContent = `Standard slider: Level ${s9Flat.value} (No physical snap)`;
+    });
+
+    s9Juice.addEventListener('input', () => {
+      const val = Number(s9Juice.value);
+      const freq = 400 + val * 80;
+      s9JuiceBubble.textContent = `Level ${val} · ${freq}Hz`;
+      s9JuiceBubble.style.transform = 'translateY(-4px) scale(1.24)';
+      s9JuiceWrap.style.transform = 'scale(1.03)';
+      setTimeout(() => {
+        s9JuiceBubble.style.transform = '';
+        s9JuiceWrap.style.transform = '';
+      }, 150);
+
+      s9Dots.forEach((dot, idx) => dot.classList.toggle('lit', idx < val));
+      playTick(freq, 0.014, 0.045);
+      log9.textContent = `Detent Snap #${val} · Bubble pop 1.24x + ${freq}Hz rotary click`;
+    });
+
+    // Demo 08: Upgraded Optimistic Archive + 4s Undo Grace
+    const s10Flat = document.getElementById('s10Flat');
+    const s10Modal = document.getElementById('s10Modal');
+    const s10ModalCancel = document.getElementById('s10ModalCancel');
+    const s10Juice = document.getElementById('s10Juice');
+    const log10 = document.getElementById('log10');
+    let undoTimer10 = null;
+
+    s10Flat.addEventListener('click', () => {
+      s10Flat.style.display = 'none';
+      s10Modal.style.display = 'block';
+      log10.textContent = 'Standard: workflow blocked by confirmation dialog!';
+    });
+    s10ModalCancel.addEventListener('click', () => {
+      s10Modal.style.display = 'none';
+      s10Flat.style.display = '';
+      log10.textContent = 'Dialog cancelled';
+    });
+
+    s10Juice.addEventListener('click', () => {
+      if (undoTimer10) {
+        clearTimeout(undoTimer10);
+        undoTimer10 = null;
+        s10Juice.textContent = 'Archive Row';
+        s10Juice.style.background = '';
+        s10Juice.style.transform = 'scale(1.08)';
+        setTimeout(() => (s10Juice.style.transform = ''), 160);
+        playTriad();
+        log10.textContent = 'Undo clicked! Row restored in 0ms with spring bounce';
+        return;
+      }
+      playTick(540, 0.02, 0.035);
+      s10Juice.textContent = '↩ Undo Archive (4s)';
+      s10Juice.style.background = '#f59e0b';
+      s10Juice.style.transform = 'scale(0.94)';
+      setTimeout(() => (s10Juice.style.transform = ''), 140);
+      log10.textContent = 'Archived in 0ms (Optimistic) · Click again within 4s to Undo';
+      undoTimer10 = setTimeout(() => {
+        undoTimer10 = null;
+        s10Juice.textContent = 'Archive Row';
+        s10Juice.style.background = '';
+        log10.textContent = '4000ms grace elapsed → Archive committed';
+      }, 4000);
+    });
+
+    // Demo 09: Magnetic Pull
+    const s5JuiceBtn = document.getElementById('s5JuiceBtn');
+    const log5 = document.getElementById('log5');
+    s5JuiceBtn.addEventListener('pointermove', e => {
+      const r = s5JuiceBtn.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width / 2)) * 0.34;
+      const dy = (e.clientY - (r.top + r.height / 2)) * 0.34;
+      s5JuiceBtn.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`;
+      log5.textContent = `Magnetic pull: dx=${dx.toFixed(1)}px, dy=${dy.toFixed(1)}px`;
+    });
+    s5JuiceBtn.addEventListener('pointerleave', () => {
+      s5JuiceBtn.style.transform = '';
+      log5.textContent = 'Elastic snapback → translate(0, 0)';
+    });
+
+    // Demo 10: Upgraded Coyote Time Hover Menu (Air Gap Challenge!)
+    const s6FlatTrigger = document.getElementById('s6FlatTrigger');
+    const s6FlatPopup = document.getElementById('s6FlatPopup');
+    const s6JuiceZone = document.getElementById('s6JuiceZone');
+    const s6JuicePopup = document.getElementById('s6JuicePopup');
+    const s6JuiceBar = document.getElementById('s6JuiceBar');
+    const s6JuiceAction = document.getElementById('s6JuiceAction');
+    const log6 = document.getElementById('log6');
+    let timer6 = null;
+
+    // Left: 0ms grace on trigger leave -> impossible to cross the 10px air gap!
+    s6FlatTrigger.addEventListener('pointerenter', () => {
+      s6FlatPopup.classList.add('open');
+      log6.textContent = 'Now try moving your mouse up to click Copy Key...';
+    });
+    s6FlatTrigger.addEventListener('pointerleave', () => {
+      s6FlatPopup.classList.remove('open');
+      log6.textContent = '✗ Closed in 0ms while crossing the gap! You missed it.';
+    });
+
+    // Right: 450ms Coyote grace buffer lets you easily cross the gap and click!
+    s6JuiceZone.addEventListener('pointerenter', () => {
+      if (timer6) {
+        clearTimeout(timer6);
+        timer6 = null;
+        s6JuiceBar.style.transition = 'none';
+        s6JuiceBar.style.width = '100%';
+        log6.textContent = '✓ Coyote Time bridged the gap! Click Copy Key now.';
+      } else {
+        playTick(760, 0.012, 0.025);
+        log6.textContent = 'Menu open · 450ms Coyote grace bar active';
+      }
+      s6JuicePopup.classList.add('open');
+    });
+
+    s6JuiceZone.addEventListener('pointerleave', () => {
+      s6JuiceBar.style.transition = 'width 450ms linear';
+      s6JuiceBar.style.width = '0%';
+      log6.textContent = 'Pointer left hitbox · holding open for 450ms Coyote window...';
+      timer6 = setTimeout(() => {
+        s6JuicePopup.classList.remove('open');
+        s6JuiceBar.style.transition = 'none';
+        s6JuiceBar.style.width = '100%';
+        timer6 = null;
+        log6.textContent = 'Grace window finished → menu closed cleanly';
+      }, 450);
+    });
+
+    s6JuiceAction.addEventListener('click', () => {
+      playTriad();
+      s6JuiceAction.textContent = '✓ Key Copied!';
+      log6.textContent = '✓ Success! Coyote Time allowed you to click inside the menu.';
+      setTimeout(() => (s6JuiceAction.textContent = '⚡ Copy Key'), 1200);
+    });
+
+    // Demo 11: 3D Perspective Tilt
+    const s11Card = document.getElementById('s11Card');
+    const s11Glare = document.getElementById('s11Glare');
+    const log11 = document.getElementById('log11');
+    s11Card.addEventListener('pointermove', e => {
+      const r = s11Card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width;
+      const y = (e.clientY - r.top) / r.height;
+      const rotY = (x - 0.5) * 20;
+      const rotX = -(y - 0.5) * 20;
+      s11Card.style.transform = `perspective(400px) rotateX(${rotX.toFixed(1)}deg) rotateY(${rotY.toFixed(1)}deg) scale(1.04)`;
+      s11Glare.style.opacity = '1';
+      s11Glare.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.24), transparent 60%)`;
+      log11.textContent = `3D Tilt: rotateX(${rotX.toFixed(1)}deg) rotateY(${rotY.toFixed(1)}deg)`;
+    });
+    s11Card.addEventListener('pointerleave', () => {
+      s11Card.style.transform = '';
+      s11Glare.style.opacity = '0';
+      log11.textContent = 'Spring settle → rotateX(0deg) rotateY(0deg)';
+    });
+
+    // Demo 12: Upgraded AI Stream Cadence (Visual Mini-Terminal on Both Sides!)
+    const s12Flat = document.getElementById('s12Flat');
+    const s12FlatBox = document.getElementById('s12FlatBox');
+    const s12Juice = document.getElementById('s12Juice');
+    const s12JuiceBox = document.getElementById('s12JuiceBox');
+    const log12 = document.getElementById('log12');
+    const streamWords = ['Compiling', 'spring', 'physics', 'tokens', '→', '60fps', '✓'];
+
+    s12Flat.addEventListener('click', () => {
+      s12FlatBox.textContent = '';
+      log12.textContent = 'Standard: dumping raw text chunks silently...';
+      setTimeout(() => { s12FlatBox.textContent = 'Compiling spring physics...'; }, 180);
+      setTimeout(() => { s12FlatBox.textContent = 'Compiling spring physics tokens → 60fps ✓'; }, 520);
+    });
+
+    s12Juice.addEventListener('click', () => {
+      s12JuiceBox.innerHTML = '';
+      const cursor = document.createElement('span');
+      cursor.className = 'stream-cursor';
+      s12JuiceBox.appendChild(cursor);
+      let idx = 0;
+      const iv = setInterval(() => {
+        if (idx < streamWords.length) {
+          const span = document.createElement('span');
+          span.className = 'token-word';
+          span.textContent = streamWords[idx];
+          if (idx === streamWords.length - 1) span.style.color = '#10b981';
+          s12JuiceBox.insertBefore(span, cursor);
+          playTick(640 + (idx % 3) * 45, 0.012, 0.028);
+          log12.textContent = `Token ${idx + 1}/${streamWords.length} · kinetic pop + ${640 + (idx % 3) * 45}Hz tick`;
+          idx++;
+        } else {
+          clearInterval(iv);
+          cursor.remove();
+          playTriad();
+          s12JuiceBox.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+          log12.textContent = 'Stream complete · C5-E5-G5 harmonic completion triad ✓';
+          setTimeout(() => (s12JuiceBox.style.borderColor = ''), 1200);
+        }
+      }, 95);
+    });
+
+    // =========================================================================
+    // 5. BILINGUAL SWITCHER (EN DEFAULT / PT)
+    // =========================================================================
+    const i18n = {
+      en: {
+        navLab: 'Interactive Sandbox (12)',
+        navThesis: 'The 120ms Thesis',
+        navWorkflows: 'Agent Workflows',
+        navInstall: 'Install Tutorial →',
+        eyebrow: 'OPEN-SOURCE AGENT SKILL · 39 MECHANICS · 0 KB AUDIO ASSETS',
+        heroTitle: 'Make interfaces feel <em>physical</em> in the first 120ms.',
+        heroLead: 'AI-generated frontends work, but often feel flat and static. <code>game-feel-ui</code> spots dull interactions in your app and makes your UI feel <strong>dynamic, fluid, and attractive</strong> using subtle, proven physics from game development—<strong>Squash & Stretch</strong>, <strong>Hitstop</strong>, <strong>Coyote Time forgiveness</strong>, and <strong>0 KB Web Audio</strong>.',
+        copyBtn: 'Copy',
+        heroInstallGuideLink: '📖 Step-by-Step Installation & Usage Tutorial →',
+        worksWith: 'Works with:',
+        heroStageTitle: 'SQUASH & STRETCH COMPARISON',
+        laneFlatTitle: 'Standard UI',
+        laneFlatSub: 'Rigid linear slide (Zero deformation)',
+        laneJuiceTitle: 'Game Feel UI',
+        laneJuiceSub: 'Preload squash → Mid-air stretch (1.42x) → Overshoot',
+        hp1: '1. Preload 0.85x',
+        hp2: '2. Stretch 1.42x',
+        hp3: '3. Overshoot +10px',
+        hp4: '4. Spring Settle ✓',
+        runDemoBtn: 'Run Comparison Demo',
+        seeMoreDemos: 'See 12 more demos ↓',
+        labKicker: 'INTERACTIVE SANDBOX',
+        labTitle: 'Test 12 Game-Feel Mechanics <em>Live</em>',
+        labSub: 'Interact with both sides of each card below to feel the difference between standard linear UI (left) and calibrated Game Feel (right).',
+        tabAll: 'All (12)',
+        tabImpact: 'Impact & Hitstop',
+        tabSpring: 'Spring & Morph',
+        tabCoyote: 'Coyote Forgiveness',
+        tabAudio: 'Audio & Cadence',
+        tabSpatial: 'Spatial & 3D',
+        thesisKicker: 'THE INTERACTION THESIS',
+        thesisTitle: 'Most AI agents ship <em>lifeless</em> transitions. We engineer kinetic cascades.',
+        thesisDesc: 'When you ask a vanilla LLM to polish an interface, it adds <code>transition: all 0.3s ease</code>. Real Game Feel coordinates four sensory layers within 120 milliseconds.',
+        themBadge: 'TYPICAL AI OUTPUT · LINEAR & PUNISHING',
+        them1: '✗ Zero pointerdown compression (button feels like a flat image)',
+        them2: '✗ Interrupts user workflow with blocking <code>window.confirm()</code> modals',
+        them3: '✗ Dropdown menus snap shut in <code>0ms</code> on diagonal mouse paths',
+        usBadge: 'WITH GAME-FEEL-UI · CALIBRATED KINETIC CASCADE',
+        us1: '✓ Physical preload on <code>pointerdown</code> + frame-freeze impact on release',
+        us2: '✓ Modal-free <strong>Hold-to-Commit</strong> tension & 4s Optimistic Undo windows',
+        us3: '✓ Invisible <strong>160ms Coyote Time</strong> forgiveness on menus & hitboxes',
+        wfKicker: 'AGENTIC WORKFLOWS',
+        wfTitle: 'Three ways to use <em>game-feel-ui</em>',
+        wfSub: 'Just describe what you want in Claude Code, Cursor, or Codex—or trigger the deterministic CLI modes directly.',
+        thScale: 'Scale / Mode',
+        thPrompt: 'What you type in your agent',
+        thResult: 'What you get in your codebase',
+        wf1Res: 'Queries 39 mechanics and 11 stack guides (React, Next.js, Framer Motion, Tailwind, Vue, Svelte, Mobile) to drop in 60fps compositor-safe code with <code>prefers-reduced-motion</code> fallbacks.',
+        wf2Res: 'Scans your repository for dead clicks, blocking <code>window.confirm()</code> calls, and layout-thrashing animations, returning a <strong>0–100 Juice Score</strong> with exact <code>file:line</code> fixes.',
+        wf3Res: 'Calibrates all CSS Custom Properties (<code>--gf-press-scale</code>, <code>--gf-hitstop-ms</code>, <code>--gf-coyote-grace-ms</code>) and saves your team\'s contract to <code>game-feel-system/MASTER.md</code>.'
+      },
+      pt: {
+        navLab: 'Sandbox Interativo (12)',
+        navThesis: 'A Tese dos 120ms',
+        navWorkflows: 'Fluxos no Agente',
+        navInstall: 'Tutorial de Instalação →',
+        eyebrow: 'SKILL OPEN-SOURCE · 39 MECÂNICAS · 0 KB DE ARQUIVOS DE ÁUDIO',
+        heroTitle: 'Torne interfaces <em>táteis e físicas</em> nos primeiros 120ms.',
+        heroLead: 'Frontends gerados por IA até funcionam, mas quase sempre parecem estáticos e sem vida. A <code>game-feel-ui</code> detecta pontos "sem graça" da sua interface e a deixa mais <strong>dinâmica, fluida e atraente</strong> usando truques sutis comprovados em jogos — <strong>Squash & Stretch</strong>, <strong>Hitstop</strong>, <strong>Coyote Time</strong> e <strong>áudio procedural de 0 KB</strong>.',
+        copyBtn: 'Copiar',
+        heroInstallGuideLink: '📖 Tutorial Passo a Passo de Instalação e Uso →',
+        worksWith: 'Compatível com:',
+        heroStageTitle: 'COMPARAÇÃO EM CÂMERA LENTA',
+        laneFlatTitle: 'Standard UI',
+        laneFlatSub: 'Deslize linear rígido (Zero deformação)',
+        laneJuiceTitle: 'Game Feel UI',
+        laneJuiceSub: 'Pré-carga → Estica no ar (1.42x) → Overshoot na borda',
+        hp1: '1. Pré-carga 0.85x',
+        hp2: '2. Estica 1.42x',
+        hp3: '3. Overshoot +10px',
+        hp4: '4. Assenta c/ Mola ✓',
+        runDemoBtn: 'Ativar Demo Comparativa',
+        seeMoreDemos: 'Ver mais 12 demos ↓',
+        labKicker: 'SANDBOX INTERATIVO',
+        labTitle: 'Teste 12 Mecânicas de Game-Feel <em>ao Vivo</em>',
+        labSub: 'Interaja com os dois lados de cada card abaixo para sentir a diferença entre uma UI linear comum (esquerda) e o Game Feel calibrado (direita).',
+        tabAll: 'Todas (12)',
+        tabImpact: 'Impacto & Hitstop',
+        tabSpring: 'Mola & Morph',
+        tabCoyote: 'Coyote Time (Perdão)',
+        tabAudio: 'Áudio & Cadência',
+        tabSpatial: 'Espacial & 3D',
+        thesisKicker: 'A TESE DE INTERAÇÃO',
+        thesisTitle: 'Agentes comuns geram transições <em>sem vida</em>. Nós projetamos cascatas cinéticas.',
+        thesisDesc: 'Quando você pede para uma IA comum polir uma tela, ela aplica <code>transition: all 0.3s ease</code>. O verdadeiro Game Feel coordena 4 camadas sensoriais em 120 milissegundos.',
+        themBadge: 'SAÍDA TÍPICA DE IA · LINEAR E PUNITIVA',
+        them1: '✗ Zero compressão no clique (o botão parece uma imagem estática)',
+        them2: '✗ Interrompe o fluxo do usuário com modais <code>window.confirm()</code> bloqueantes',
+        them3: '✗ Menus dropdown fecham em <code>0ms</code> quando o mouse escapa na diagonal',
+        usBadge: 'COM GAME-FEEL-UI · CASCATA CINÉTICA CALIBRADA',
+        us1: '✓ Pré-carga física no <code>pointerdown</code> + micro-pausa de impacto (Hitstop)',
+        us2: '✓ Ações destrutivas com <strong>Hold-to-Commit</strong> e janela de Undo de 4s sem modal',
+        us3: '✓ Tolerância invisível de <strong>160ms (Coyote Time)</strong> em menus e áreas de clique',
+        wfKicker: 'FLUXOS AGÊNTICOS',
+        wfTitle: 'Três formas de usar a <em>game-feel-ui</em>',
+        wfSub: 'Basta descrever o que você quer no Claude Code, Cursor ou Codex — ou acionar os modos determinísticos via CLI.',
+        thScale: 'Escala / Modo',
+        thPrompt: 'O que você digita no agente',
+        thResult: 'O que você recebe no seu código',
+        wf1Res: 'Consulta 39 mecânicas e 11 stacks (React, Next.js, Framer Motion, Tailwind, Vue, Svelte, Mobile) entregando código a 60fps seguro para o compositor com suporte a <code>prefers-reduced-motion</code>.',
+        wf2Res: 'Escaneia seu repositório buscando cliques mortos, chamadas <code>window.confirm()</code> e animações pesadas, retornando um <strong>Juice Score de 0 a 100</strong> com correções por <code>arquivo:linha</code>.',
+        wf3Res: 'Calibra todas as variáveis CSS (<code>--gf-press-scale</code>, <code>--gf-hitstop-ms</code>, <code>--gf-coyote-grace-ms</code>) e salva o contrato do projeto em <code>game-feel-system/MASTER.md</code>.'
+      }
+    };
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        document.documentElement.lang = lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const k = el.getAttribute('data-i18n');
+          if (i18n[lang][k]) el.innerHTML = i18n[lang][k];
+        });
+        playTick(840, 0.01);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -392,8 +392,8 @@ button {
   margin: 6px 0 14px;
 }
 .preview img {
-  width: 96px;
-  height: 96px;
+  height: 130px;
+  width: auto;
   image-rendering: pixelated;
 }
 .tabs {

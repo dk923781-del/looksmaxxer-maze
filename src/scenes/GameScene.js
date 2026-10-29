@@ -2,10 +2,10 @@ import Phaser from 'phaser';
 import { TILE, COLS, ROWS, MW, MH, BASE_SPEED, MAX_SPEED, DIRS, opp, clamp, levelFromXp, stageForLevel, MAX_LIVES, MAX_BLACKPILL } from '../config.js';
 import { generateMaze, idx, isFloor, isPlayerPass, distField, glitchWalls, inb } from '../maze.js';
 import { makeRng } from '../rng.js';
-import { WORLDS, levelDef, BOSSES, CHAR_BY_ID, SKIN_BY_ID, BONUS_TYPES } from '../data.js';
+import { WORLDS, levelDef, BOSSES, CHAR_BY_ID, SKIN_BY_ID, BONUS_TYPES, VOICE } from '../data.js';
 import * as SV from '../save.js';
-import { ensurePlayerTex, buildBaseTextures } from '../textures.js';
-import { sfx, startMusic, stopMusic } from '../audio.js';
+import { ensurePlayerTex, buildBaseTextures, hasSheet } from '../textures.js';
+import { sfx, startMusic, stopMusic, speak } from '../audio.js';
 import { haptic } from '../tg.js';
 import { bus } from '../bus.js';
 
@@ -202,7 +202,10 @@ export default class GameScene extends Phaser.Scene {
     this.banner(`W${w}-${l}  ${this.world.name.toUpperCase()}`, '#ffffff', 1.6);
     if (bossDef) {
       sfx.boss();
-      this.time.delayedCall(900, () => this.banner(`BOSS: ${bossDef.name}`, '#ff4a4a', 1.4));
+      this.time.delayedCall(900, () => {
+        this.banner(`BOSS: ${bossDef.name}`, '#ff4a4a', 1.4);
+        this.bossSay('intro');
+      });
     }
     this.emitHud(true);
     bus.emit('level:start', { def, hard: this.hard });
@@ -311,6 +314,7 @@ export default class GameScene extends Phaser.Scene {
     }
     P.spr = this.add.image(0, 0, this.ch.tex + '_d0');
     this.lActors.add(P.spr);
+    P.spr.setOrigin(0.5, hasSheet(this.ch.id) ? 0.62 : 0.5);
     this.placeSprite(P.spr, P.x, P.y);
     // enemies
     this.enemies = [];
@@ -422,6 +426,18 @@ export default class GameScene extends Phaser.Scene {
     this.zones = [];
     this.P = null;
     this.S = null;
+  }
+
+  bossSay(kind) {
+    const S = this.S;
+    if (!S || !S.bossDef) return;
+    const v = VOICE[S.bossDef.id];
+    if (!v || !v.lines[kind]) return;
+    speak(v.lines[kind], v);
+  }
+
+  shake(ms, amt) {
+    this.cameras.main.shake(ms, amt);
   }
 
   // ---------------- bonuses & abilities ----------------
@@ -546,6 +562,10 @@ export default class GameScene extends Phaser.Scene {
     const S = this.S;
     const P = this.P;
     const maze = this.maze;
+    if (S.hitStop > 0) {
+      S.hitStop -= dt;
+      return;
+    }
     S.time += dt;
     // combo decay
     if (S.chain > 0 && S.time - S.lastPick > 1.2) {
@@ -732,7 +752,7 @@ export default class GameScene extends Phaser.Scene {
         this.addScore(10 * S.mult);
         this.addXp(1);
         SV.bumpStat('pellets');
-        sfx.pellet();
+        sfx.pellet(S.chain);
       }
       if (this.coinSpr.has(i)) this.collectCoin(i);
       if (this.sphSpr.has(i)) {
@@ -1044,6 +1064,7 @@ export default class GameScene extends Phaser.Scene {
         S.phase = ph;
         this.banner(`PHASE ${ph}`, '#ff4a4a', 1.2);
         sfx.boss();
+        this.bossSay(ph === 3 ? 'phase3' : 'phase2');
         for (const z of this.zones) z.dormant = ph < 2;
       }
     }
@@ -1293,6 +1314,9 @@ export default class GameScene extends Phaser.Scene {
     this.addXp(60);
     sfx.bosshit();
     haptic('heavy');
+    S.hitStop = 0.07;
+    this.shake(260, 0.012);
+    this.bossSay(S.bossHp <= 0 ? 'dead' : 'hit');
     this.burst(e.spr.x, e.spr.y, 0xffffff, 24, 60);
     this.popup(e.spr.x, e.spr.y - 10, 'HIT!', '#ff4a4a');
     if (S.bossHp <= 0) {
@@ -1337,6 +1361,8 @@ export default class GameScene extends Phaser.Scene {
     }
     S.deaths++;
     S.lives--;
+    this.shake(220, 0.01);
+    if (e && e.boss) this.bossSay('kill');
     SV.S().stats.deaths++;
     S.state = 'dying';
     S.dieT = 1.2;

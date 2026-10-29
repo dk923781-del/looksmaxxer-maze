@@ -158,7 +158,7 @@ with sync_playwright() as p:
         pg.reload()
         pg.wait_for_selector('body[data-ready="1"]')
         st = js(pg, 'window.__game.SV.S().settings')
-        assert st == {'music': 0.25, 'sfx': 0.4, 'mute': True, 'vibration': False, 'controls': 'swipe'}, st
+        assert st == {'music': 0.25, 'sfx': 0.4, 'voice': 0.8, 'bass': True, 'mute': True, 'vibration': False, 'controls': 'swipe'}, st
         pg.click('#btn-settings')
         assert pg.input_value('#s-music') == '25' and pg.input_value('#s-sfx') == '40'
         pg.close()
@@ -287,7 +287,7 @@ with sync_playwright() as p:
            s.startFright(); boss.state="fright"; boss.immune=0; boss.x=s.P.x; boss.y=s.P.y; s.step(1/60);
            return {hp0, hp:s.S.bossHp, id:boss.boss.id, st:boss.state}})()''')
         assert r['id'] == 'zeta' and r['hp'] == r['hp0'] - 1 and r['st'] == 'eyes', r
-        js(pg, '''(()=>{const s=window.__game.scene; const boss=s.enemies[0]; for(let k=0;k<3;k++){ boss.immune=0; boss.state="fright"; boss.x=s.P.x; boss.y=s.P.y; s.step(1/60);} for(let i=0;i<120;i++) s.step(1/30); })()''')
+        js(pg, '''(()=>{const s=window.__game.scene; const boss=s.enemies[0]; for(let k=0;k<3;k++){ boss.immune=0; boss.state="fright"; boss.x=s.P.x; boss.y=s.P.y; s.step(1/60); for(let j=0;j<6;j++) s.step(1/60);} for(let i=0;i<120;i++) s.step(1/30); })()''')
         pg.wait_for_selector('#btn-menu', timeout=8000)
         assert js(pg, 'window.__game.SV.S().bosses.zeta') is True
         assert js(pg, 'window.__game.SV.isCharUnlocked("zetaboss")') is True
@@ -405,6 +405,43 @@ with sync_playwright() as p:
         assert js(pg, 'window.__game.S.state') == 'paused'
         pg.keyboard.press('Escape')
         pg.wait_for_function('window.__game.S.state === "play"')
+        pg.close()
+
+    @run('music: 6 original tracks play, volume/mute control the output, speak() never throws')
+    def _():
+        pg = new_page(b)
+        pg.click('#btn-play')  # user gesture so audio can start
+        res = js(pg, '''(async()=>{ const a = window.__game.mods.audio; a.initAudio(); const out={};
+          const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
+          a.setVolumes(1,0,false,{voice:1,bass:true});
+          for(let i=0;i<a.TRACK_COUNT;i++){ a.startMusic(i); await wait(1400); let m=0; for(let k=0;k<12;k++){ m=Math.max(m,a.levelNow()); await wait(60);} out['t'+i]=m; }
+          a.startMusic(1); await wait(500);
+          a.setVolumes(0,0,false,{voice:1}); await wait(3200); out.zero=Math.max(a.levelNow(),a.levelNow());
+          a.setVolumes(1,0,true,{voice:1}); await wait(300); out.muted=a.levelNow();
+          a.setVolumes(1,0,false,{voice:1}); await wait(300); let m2=0; for(let k=0;k<12;k++){ m2=Math.max(m2,a.levelNow()); await wait(60);} out.back=m2;
+          a.stopMusic(); a.speak('Sigma grindset', {pitch:0.3, rate:0.8, blip:160}); await wait(500); out.spoke=true;
+          return out; })()''')
+        for i in range(6):
+            assert res[f't{i}'] > 0.003, ('silent track', i, res)
+        assert res['zero'] < 0.002 and res['muted'] < 0.002, res
+        assert res['back'] > 0.003, res
+        pg.close()
+
+    @run('characters use the face sprite sheets; skins recolour; 4 evolution rows')
+    def _():
+        pg = new_page(b)
+        r = js(pg, '''(async()=>{ const t = window.__game.mods.textures; const out={};
+          for (const id of ['valera_broke','moggsu','zetaboss','hulioboss','dildoboss']) out[id]=t.hasSheet(id);
+          const a=t.playerPreviewURL('moggsu','base',1,2), b=t.playerPreviewURL('moggsu','neon',1,2), c=t.playerPreviewURL('moggsu','base',2,2);
+          out.skinDiffers = a!==b; out.stageDiffers = a!==c; return out; })()''')
+        assert all(r[k] for k in ['valera_broke', 'moggsu', 'zetaboss', 'hulioboss', 'dildoboss', 'skinDiffers', 'stageDiffers']), r
+        pg.close()
+
+    @run('boss voice lines exist for every boss')
+    def _():
+        pg = new_page(b)
+        r = js(pg, '''(async()=>{ const d = window.__game.mods.data; return Object.keys(d.BOSSES).map(k=>[k, !!(d.VOICE[k] && d.VOICE[k].lines.intro && d.VOICE[k].lines.hit && d.VOICE[k].lines.dead)]) })()''')
+        assert all(v for _k, v in r), r
         pg.close()
 
     @run('save schema migration from v1')

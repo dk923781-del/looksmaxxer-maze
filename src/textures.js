@@ -89,6 +89,60 @@ export function charPal(charId, skinId) {
   return sk && sk.shift ? { ...base, ...sk.shift } : base;
 }
 
+export const FW = 28;
+export const FH = 30;
+export const FRAME_NAMES = ['d0', 'd1', 'u0', 'u1', 'l0', 'l1', 'r0', 'r1', 'hurt', 'win'];
+const SHEETS = {};
+export const hasSheet = (id) => !!SHEETS[id];
+
+export function loadSheets(ids, base) {
+  return Promise.all(
+    ids.map(
+      (id) =>
+        new Promise((res) => {
+          const im = new Image();
+          im.onload = () => {
+            SHEETS[id] = im;
+            res();
+          };
+          im.onerror = () => res();
+          im.src = `${base}assets/characters/${id}.png`;
+        }),
+    ),
+  );
+}
+
+const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+
+// one frame of a sheet, recoloured for the chosen skin (shirt/accent are exact marker colours)
+export function sheetFrame(charId, skinId, stage, i) {
+  const img = SHEETS[charId];
+  const row = Math.min(stage, Math.floor(img.height / FH)) - 1;
+  const c = document.createElement('canvas');
+  c.width = FW;
+  c.height = FH;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, i * FW, row * FH, FW, FH, 0, 0, FW, FH);
+  const base = CHAR_BY_ID[charId].pal;
+  const pal = charPal(charId, skinId);
+  const map = [];
+  for (const k of ['shirt', 'accent']) if (base[k] !== pal[k]) map.push([hexToRgb(base[k]), hexToRgb(pal[k])]);
+  if (map.length) {
+    const d = ctx.getImageData(0, 0, FW, FH);
+    for (let p = 0; p < d.data.length; p += 4) {
+      for (const [from, to] of map) {
+        if (d.data[p] === from[0] && d.data[p + 1] === from[1] && d.data[p + 2] === from[2]) {
+          d.data[p] = to[0];
+          d.data[p + 1] = to[1];
+          d.data[p + 2] = to[2];
+        }
+      }
+    }
+    ctx.putImageData(d, 0, 0);
+  }
+  return c;
+}
+
 export function playerKey(charId, skinId, stage) {
   return `pl_${charId}_${skinId}_${stage}`;
 }
@@ -97,19 +151,14 @@ export function ensurePlayerTex(scene, charId, skinId, stage) {
   const key = playerKey(charId, skinId, stage);
   if (scene.textures.exists(key + '_d0')) return key;
   const pal = charPal(charId, skinId);
-  // custom sprite sheet: public/assets/characters/<id>.png, 16x16 frames, one row per stage (160x64):
-  // d0 d1 u0 u1 l0 l1 r0 r1 hurt win
-  const sheetKey = 'sheet_' + charId;
-  if (scene.textures.exists(sheetKey)) {
-    const img = scene.textures.get(sheetKey).getSourceImage();
-    const row = Math.min(stage, Math.floor(img.height / 16)) - 1;
-    if (row >= 0 && img.width >= 160) {
-      const names = ['d0', 'd1', 'u0', 'u1', 'l0', 'l1', 'r0', 'r1', 'hurt', 'win'];
-      names.forEach((n, i) =>
-        mk(scene, `${key}_${n}`, 16, 16, (ctx) => ctx.drawImage(img, i * 16, row * 16, 16, 16, 0, 0, 16, 16)),
-      );
-      return key;
-    }
+  // face sprite sheets (tools/make_sprites.py): 28x30 frames, 10 per row, one row per stage
+  if (SHEETS[charId]) {
+    const names = FRAME_NAMES;
+    names.forEach((n, i) => {
+      const fc = sheetFrame(charId, skinId, stage, i);
+      mk(scene, `${key}_${n}`, FW, FH, (ctx) => ctx.drawImage(fc, 0, 0));
+    });
+    return key;
   }
   for (const d of ['d', 'u', 'l', 'r'])
     for (const f of [0, 1]) mk(scene, `${key}_${d}${f}`, 16, 16, (ctx) => drawPlayer(ctx, d, f, pal, stage, 'walk'));
@@ -120,17 +169,25 @@ export function ensurePlayerTex(scene, charId, skinId, stage) {
 
 // big preview (for menus), canvas -> data URL
 export function playerPreviewURL(charId, skinId, stage, scale = 6) {
-  const c = document.createElement('canvas');
-  c.width = 16;
-  c.height = 16;
-  const ctx = c.getContext('2d');
-  drawPlayer(ctx, 'd', 0, charPal(charId, skinId), stage, 'walk');
+  let src;
+  let w = 16;
+  let h = 16;
+  if (SHEETS[charId]) {
+    src = sheetFrame(charId, skinId, stage, 0);
+    w = FW;
+    h = FH;
+  } else {
+    src = document.createElement('canvas');
+    src.width = 16;
+    src.height = 16;
+    drawPlayer(src.getContext('2d'), 'd', 0, charPal(charId, skinId), stage, 'walk');
+  }
   const o = document.createElement('canvas');
-  o.width = 16 * scale;
-  o.height = 16 * scale;
+  o.width = w * scale;
+  o.height = h * scale;
   const octx = o.getContext('2d');
   octx.imageSmoothingEnabled = false;
-  octx.drawImage(c, 0, 0, o.width, o.height);
+  octx.drawImage(src, 0, 0, o.width, o.height);
   return o.toDataURL();
 }
 

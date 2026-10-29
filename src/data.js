@@ -160,3 +160,12 @@ export const QUEST_POOL = [
   { id: 'bonus4', text: 'Pick up 4 bonuses', stat: 'bonuses', target: 4, reward: 40 },
   { id: 'abil3', text: 'Use your ability 3 times', stat: 'ability', target: 3, reward: 30 },
 ];
+
+// ---------------- boss voice lines (original meme-style phrases) ----------------
+export const VOICE = {
+  mini1: { pitch: 0.7, rate: 1.0, blip: 260, lines: { intro: 'Target locked.', hit: 'Ouch. My aura.', dead: 'Respect.', kill: 'Skill issue.' } },
+  mini2: { pitch: 0.5, rate: 0.9, blip: 200, lines: { intro: 'Leg day is every day.', hit: 'That was my protein.', dead: 'I need a spotter.', kill: 'Light weight, baby.' } },
+  zeta: { pitch: 0.35, rate: 0.8, blip: 160, lines: { intro: 'Sigma grindset. You are not him.', hit: 'Bro. That hurt my aura.', dead: 'My aura. Is gone.', kill: 'Mogged. Skill issue.' } },
+  hulio: { pitch: 1.7, rate: 1.3, blip: 520, lines: { intro: 'Look into my eyes, mogger.', hit: 'Error. Aura leaking.', phase2: 'Glitch mode.', dead: 'System failure. Respect.', kill: 'Cope.' } },
+  dildo: { pitch: 0.1, rate: 0.7, blip: 110, lines: { intro: 'Welcome to the tower. Prepare to be mogged.', hit: 'Impossible.', phase2: 'Now I am serious.', phase3: 'Final form. Aura maximum.', dead: 'You are the ultimate mogger.', kill: 'Ratio.' } },
+};

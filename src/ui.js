@@ -44,7 +44,7 @@ export function initUI(scene) {
 // ---------------- helpers ----------------
 function applySettings() {
   const st = S().settings;
-  setVolumes(st.music, st.sfx, st.mute);
+  setVolumes(st.music, st.sfx, st.mute, { voice: st.voice, bass: st.bass });
   setVibration(st.vibration);
   document.body.dataset.controls = st.controls;
   updateControlsVisibility();
@@ -181,6 +181,7 @@ const actions = {
     const st = S().settings;
     if (d.k === 'mute') st.mute = !st.mute;
     if (d.k === 'vibration') st.vibration = !st.vibration;
+    if (d.k === 'bass') st.bass = !st.bass;
     if (d.k === 'controls') st.controls = st.controls === 'dpad' ? 'swipe' : 'dpad';
     SV.save();
     applySettings();
@@ -359,7 +360,7 @@ function showChars() {
       : `<img class="portrait" alt="" src="${playerPreviewURL(ch.id, skin, stage, 4)}">`;
     return `<div class="card ${d.sel === ch.id ? 'sel' : ''}"><div class="row">${img}<div class="grow"><h3>${ch.name}</h3><div class="dim">${ch.tag}</div><div>${info}</div></div></div>
       <div style="margin-top:6px"><b class="cyan">${ch.ability.name}</b> <span class="dim">(cd ${ch.ability.cd}s)</span><br>${ch.ability.text}</div>
-      <div class="row" style="margin-top:8px;justify-content:space-between"><img alt="" style="width:48px;height:48px;image-rendering:pixelated" src="${playerPreviewURL(ch.id, skin, stage, 3)}">${action}</div></div>`;
+      <div class="row" style="margin-top:8px;justify-content:space-between"><img alt="" style="height:64px;width:auto;image-rendering:pixelated" src="${playerPreviewURL(ch.id, skin, stage, 3)}">${action}</div></div>`;
   }).join('');
   setScreen(cards, { back: true, title: 'CHARACTERS' });
 }
@@ -423,7 +424,7 @@ function showShop() {
         if (equipped) right = '<span class="green">EQUIPPED</span>';
         else if (owned) right = `<button class="btn small" data-act="equip" data-id="${id}" data-skin="${sk.id}">EQUIP</button>`;
         else right = `<button class="btn small gold ${d.coins >= sk.price ? '' : 'off'}" data-act="buyskin" data-id="${id}" data-skin="${sk.id}" id="buy-skin-${sk.id}">${fmt(sk.price)}</button>`;
-        return `<div class="card"><div class="row"><img alt="" style="width:64px;height:64px;image-rendering:pixelated" src="${playerPreviewURL(id, sk.id, charHeader(id).stage, 4)}"><div class="grow"><h3>${sk.name}</h3><span class="dim">${sk.rarity || 'default'}</span></div>${right}</div></div>`;
+        return `<div class="card"><div class="row"><img alt="" style="height:72px;width:auto;image-rendering:pixelated" src="${playerPreviewURL(id, sk.id, charHeader(id).stage, 4)}"><div class="grow"><h3>${sk.name}</h3><span class="dim">${sk.rarity || 'default'}</span></div>${right}</div></div>`;
       }).join('');
   } else {
     body = ITEMS.map((it) => {
@@ -455,7 +456,9 @@ function showSettings() {
   const st = S().settings;
   setScreen(
     `<div class="card"><div>Music volume</div><input id="s-music" class="slider" type="range" min="0" max="100" value="${Math.round(st.music * 100)}"></div>
+     <div class="card row"><span class="grow">Bass boost</span><button class="btn small toggle" data-act="toggle" data-k="bass" id="t-bass">${st.bass ? 'ON' : 'OFF'}</button></div>
      <div class="card"><div>Effects volume</div><input id="s-sfx" class="slider" type="range" min="0" max="100" value="${Math.round(st.sfx * 100)}"></div>
+     <div class="card"><div>Boss voice volume</div><input id="s-voice" class="slider" type="range" min="0" max="100" value="${Math.round(st.voice * 100)}"></div>
      <div class="card row"><span class="grow">Mute all</span><button class="btn small toggle" data-act="toggle" data-k="mute" id="t-mute">${st.mute ? 'ON' : 'OFF'}</button></div>
      <div class="card row"><span class="grow">Vibration</span><button class="btn small toggle" data-act="toggle" data-k="vibration" id="t-vib">${st.vibration ? 'ON' : 'OFF'}</button></div>
      <div class="card row"><span class="grow">Mobile controls</span><button class="btn small toggle" data-act="toggle" data-k="controls" id="t-ctl">${st.controls === 'dpad' ? 'D-PAD' : 'SWIPE'}</button></div>
@@ -476,6 +479,7 @@ function showSettings() {
   };
   bind('#s-music', 'music');
   bind('#s-sfx', 'sfx');
+  bind('#s-voice', 'voice');
 }
 
 // ---------------- modals ----------------

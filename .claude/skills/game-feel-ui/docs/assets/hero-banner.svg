@@ -1,0 +1,237 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 460" width="1200" height="460">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E0E11"/>
+      <stop offset="55%" stop-color="#131318"/>
+      <stop offset="100%" stop-color="#0B0B0E"/>
+    </linearGradient>
+    <radialGradient id="glowVermilion" cx="72%" cy="48%" r="40%">
+      <stop offset="0%" stop-color="#FF5722" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#FF5722" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowIndigo" cx="84%" cy="62%" r="35%">
+      <stop offset="0%" stop-color="#6366F1" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dotGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#F4F2ED" fill-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <style>
+    @keyframes linearThumb {
+      0%, 16% { transform: translateX(0px); }
+      32%, 64% { transform: translateX(136px); }
+      78%, 100% { transform: translateX(0px); }
+    }
+
+    @keyframes linearTrack {
+      0%, 16% { fill: #23232C; }
+      32%, 64% { fill: #3E3E4C; }
+      78%, 100% { fill: #23232C; }
+    }
+
+    @keyframes juiceThumb {
+      0%, 8%   { transform: translateX(0px) scale(1, 1); }
+      10%      { transform: translateX(-1.8px) scale(0.94, 1.06); }
+      12%      { transform: translateX(-3.8px) scale(0.88, 1.12); }
+      14%      { transform: translateX(-5.0px) scale(0.85, 1.16); }
+      16%      { transform: translateX(-4.2px) scale(0.86, 1.15); }
+      18%      { transform: translateX(5px) scale(1.08, 0.93); }
+      20%      { transform: translateX(22px) scale(1.25, 0.81); }
+      22%      { transform: translateX(45px) scale(1.39, 0.74); }
+      24%      { transform: translateX(70px) scale(1.45, 0.71); }
+      26%      { transform: translateX(96px) scale(1.40, 0.74); }
+      28%      { transform: translateX(120px) scale(1.26, 0.81); }
+      30%      { transform: translateX(138px) scale(1.04, 0.96); }
+      32%      { transform: translateX(147px) scale(0.86, 1.15); }
+      34%      { transform: translateX(149px) scale(0.82, 1.19); }
+      36%      { transform: translateX(143px) scale(0.91, 1.09); }
+      38%      { transform: translateX(135px) scale(1.02, 0.98); }
+      40%      { transform: translateX(130px) scale(1.07, 0.94); }
+      42%      { transform: translateX(132px) scale(1.04, 0.96); }
+      44%      { transform: translateX(135.5px) scale(1.00, 1.00); }
+      46%      { transform: translateX(137px) scale(0.99, 1.01); }
+      48%, 58% { transform: translateX(136px) scale(1, 1); }
+      60%      { transform: translateX(138px) scale(0.94, 1.06); }
+      62%      { transform: translateX(140.5px) scale(0.86, 1.15); }
+      64%      { transform: translateX(139px) scale(0.90, 1.10); }
+      66%      { transform: translateX(127px) scale(1.12, 0.90); }
+      68%      { transform: translateX(106px) scale(1.32, 0.78); }
+      70%      { transform: translateX(80px) scale(1.44, 0.72); }
+      72%      { transform: translateX(52px) scale(1.41, 0.73); }
+      74%      { transform: translateX(26px) scale(1.27, 0.80); }
+      76%      { transform: translateX(5px) scale(1.05, 0.96); }
+      78%      { transform: translateX(-8px) scale(0.85, 1.16); }
+      80%      { transform: translateX(-10px) scale(0.83, 1.18); }
+      82%      { transform: translateX(-3px) scale(0.94, 1.06); }
+      84%      { transform: translateX(4px) scale(1.05, 0.96); }
+      86%      { transform: translateX(1.5px) scale(1.02, 0.98); }
+      88%, 100%{ transform: translateX(0px) scale(1, 1); }
+    }
+
+    @keyframes juiceTrack {
+      0%, 18%  { fill: #1F1F29; stroke: #383846; }
+      28%, 66% { fill: #FF5722; stroke: #FF8A65; }
+      76%, 100%{ fill: #1F1F29; stroke: #383846; }
+    }
+
+    @keyframes phase1 {
+      0%, 7%   { opacity: 0.28; }
+      8%, 17%  { opacity: 1; }
+      18%, 58% { opacity: 0.28; }
+      59%, 65% { opacity: 1; }
+      66%, 100%{ opacity: 0.28; }
+    }
+    @keyframes phase2 {
+      0%, 17%  { opacity: 0.28; }
+      18%, 30% { opacity: 1; }
+      31%, 65% { opacity: 0.28; }
+      66%, 76% { opacity: 1; }
+      77%, 100%{ opacity: 0.28; }
+    }
+    @keyframes phase3 {
+      0%, 30%  { opacity: 0.28; }
+      31%, 39% { opacity: 1; }
+      40%, 76% { opacity: 0.28; }
+      77%, 83% { opacity: 1; }
+      84%, 100%{ opacity: 0.28; }
+    }
+    @keyframes phase4 {
+      0%, 39%  { opacity: 0.28; }
+      40%, 58% { opacity: 1; }
+      59%, 83% { opacity: 0.28; }
+      84%, 96% { opacity: 1; }
+      97%, 100%{ opacity: 0.28; }
+    }
+
+    @keyframes impactRing {
+      0%, 31%  { transform: scale(0.8); opacity: 0; }
+      33%      { transform: scale(1.05); opacity: 0.85; }
+      46%, 100%{ transform: scale(2.1); opacity: 0; }
+    }
+
+    .anim-linear-thumb {
+      animation: linearThumb 7.2s linear infinite;
+    }
+    .anim-linear-track {
+      animation: linearTrack 7.2s linear infinite;
+    }
+    .anim-juice-thumb {
+      animation: juiceThumb 7.2s linear infinite;
+    }
+    .anim-juice-track {
+      animation: juiceTrack 7.2s linear infinite;
+    }
+    .anim-ring {
+      animation: impactRing 7.2s linear infinite;
+    }
+    .p1 { animation: phase1 7.2s linear infinite; }
+    .p2 { animation: phase2 7.2s linear infinite; }
+    .p3 { animation: phase3 7.2s linear infinite; }
+    .p4 { animation: phase4 7.2s linear infinite; }
+  </style>
+
+  <!-- Background -->
+  <rect width="1200" height="460" rx="20" fill="url(#bgGrad)" stroke="#2A2A32" stroke-width="2"/>
+  <rect width="1200" height="460" rx="20" fill="url(#dotGrid)"/>
+  <rect width="1200" height="460" rx="20" fill="url(#glowVermilion)"/>
+  <rect width="1200" height="460" rx="20" fill="url(#glowIndigo)"/>
+
+  <!-- LEFT COLUMN (Summary, Description, Install) -->
+  <g transform="translate(64, 68)">
+    <!-- Pill Badge -->
+    <rect x="0" y="0" width="290" height="30" rx="15" fill="#1A1A20" stroke="#34343F" stroke-width="1"/>
+    <circle cx="16" cy="15" r="4.5" fill="#FF5722"/>
+    <text x="30" y="19" fill="#D5D2CD" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" letter-spacing="1.4">AGENT SKILL · CLAUDE CODE &amp; CURSOR</text>
+
+    <!-- Title -->
+    <text x="0" y="92" fill="#F4F2ED" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', sans-serif" font-size="54" font-weight="700" letter-spacing="-2">game-feel-ui</text>
+    <text x="0" y="138" fill="#A6A29B" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="28">The physics of the first 120 milliseconds.</text>
+
+    <!-- Subtitle -->
+    <text x="0" y="184" fill="#8E8B84" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="15.5">Turn flat, AI-looking frontends into dynamic, fluid, and tactile UIs</text>
+    <text x="0" y="208" fill="#8E8B84" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="15.5">using 39 Game Dev mechanics, Coyote Time UX &amp; 0 KB Web Audio.</text>
+
+    <!-- Terminal Pill -->
+    <rect x="0" y="242" width="420" height="48" rx="10" fill="#09090B" stroke="#32323D" stroke-width="1.5"/>
+    <text x="18" y="271" fill="#FF5722" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="600">$</text>
+    <text x="36" y="271" fill="#F4F2ED" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14">npx skills add e-fiuza/game-feel-ui</text>
+
+    <!-- Metrics Footer -->
+    <g transform="translate(0, 322)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#8E8B84">
+      <text x="0" y="0"><tspan fill="#F4F2ED" font-weight="600">39</tspan> MECHANICS</text>
+      <text x="118" y="0">·</text>
+      <text x="134" y="0"><tspan fill="#F4F2ED" font-weight="600">23</tspan> COMPONENTS</text>
+      <text x="258" y="0">·</text>
+      <text x="274" y="0"><tspan fill="#F4F2ED" font-weight="600">11</tspan> STACKS</text>
+      <text x="368" y="0">·</text>
+      <text x="384" y="0"><tspan fill="#10B981" font-weight="600">0 KB</tspan> AUDIO ASSETS</text>
+    </g>
+  </g>
+
+  <!-- RIGHT COLUMN: ANIMATED 0.25x SLOW-MOTION COMPARISON DEMO -->
+  <g transform="translate(596, 46)">
+    <rect x="0" y="0" width="548" height="368" rx="16" fill="#121217" stroke="#2D2D38" stroke-width="1.5"/>
+
+    <!-- Window Header -->
+    <rect x="0" y="0" width="548" height="38" rx="16" fill="#181820"/>
+    <circle cx="20" cy="19" r="5" fill="#FF5F57"/>
+    <circle cx="36" cy="19" r="5" fill="#FFBD2E"/>
+    <circle cx="52" cy="19" r="5" fill="#28C840"/>
+    <text x="274" y="23" text-anchor="middle" fill="#D5D2CD" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="600">0.25x SLOW-MOTION COMPARISON · SQUASH &amp; STRETCH</text>
+
+    <!-- TOP TRACK: STANDARD UI (WITHOUT SKILL) -->
+    <g transform="translate(28, 54)">
+      <rect x="0" y="0" width="492" height="108" rx="12" fill="#0B0B0E" stroke="#262632" stroke-width="1"/>
+      <text x="18" y="36" fill="#D5D2CD" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', sans-serif" font-size="19" font-weight="800" letter-spacing="-0.4">Standard UI</text>
+      <rect x="138" y="19" width="96" height="20" rx="5" fill="#1C1C24" stroke="#323240" stroke-width="1"/>
+      <text x="186" y="33" text-anchor="middle" fill="#8E8B84" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" font-weight="600">WITHOUT SKILL</text>
+      <text x="18" y="60" fill="#78756F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">Linear CSS slide · Zero deformation</text>
+
+      <!-- Linear Switch Track -->
+      <g transform="translate(274, 25)">
+        <rect class="anim-linear-track" x="0" y="0" width="194" height="58" rx="29" fill="#23232C" stroke="#343442" stroke-width="1.5"/>
+        <g transform="translate(29, 29)">
+          <circle class="anim-linear-thumb" cx="0" cy="0" r="21" fill="#8E8B84"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- BOTTOM TRACK: GAME FEEL UI (WITH SKILL) -->
+    <g transform="translate(28, 176)">
+      <rect x="0" y="0" width="492" height="122" rx="12" fill="#0D0D12" stroke="#FF5722" stroke-opacity="0.55" stroke-width="1.5"/>
+      <circle cx="24" cy="30" r="5" fill="#FF5722"/>
+      <text x="36" y="36" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', sans-serif" font-size="19" font-weight="800" letter-spacing="-0.4">Game Feel UI</text>
+      <rect x="166" y="19" width="84" height="20" rx="5" fill="#FF5722" fill-opacity="0.18" stroke="#FF5722" stroke-opacity="0.5" stroke-width="1"/>
+      <text x="208" y="33" text-anchor="middle" fill="#FF8A65" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" font-weight="700">WITH SKILL</text>
+      <text x="18" y="60" fill="#A6A29B" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">Preload squash → Mid-air stretch → Spring settle</text>
+
+      <!-- Game Feel Switch Track -->
+      <g transform="translate(274, 30)">
+        <rect class="anim-juice-track" x="0" y="0" width="194" height="58" rx="29" fill="#1F1F29" stroke="#383846" stroke-width="1.5"/>
+        <g transform="translate(165, 29)">
+          <circle class="anim-ring" cx="0" cy="0" r="21" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0"/>
+        </g>
+        <g transform="translate(29, 29)">
+          <circle class="anim-juice-thumb" cx="0" cy="0" r="21" fill="#FFFFFF"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- LIVE PHASE CALLOUT BAR AT BOTTOM -->
+    <g transform="translate(28, 312)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" font-weight="600">
+      <rect x="0" y="0" width="116" height="36" rx="7" fill="#181820" class="p1"/>
+      <text x="58" y="22" text-anchor="middle" fill="#F59E0B" class="p1">1. Preload 0.85x</text>
+
+      <rect x="125" y="0" width="116" height="36" rx="7" fill="#181820" class="p2"/>
+      <text x="183" y="22" text-anchor="middle" fill="#6366F1" class="p2">2. Stretch 1.45x</text>
+
+      <rect x="250" y="0" width="116" height="36" rx="7" fill="#181820" class="p3"/>
+      <text x="308" y="22" text-anchor="middle" fill="#FF5722" class="p3">3. Overshoot +13px</text>
+
+      <rect x="375" y="0" width="117" height="36" rx="7" fill="#181820" class="p4"/>
+      <text x="433" y="22" text-anchor="middle" fill="#10B981" class="p4">4. Spring Settle ✓</text>
+    </g>
+  </g>
+</svg>
