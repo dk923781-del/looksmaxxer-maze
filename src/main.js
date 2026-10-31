@@ -1,12 +1,15 @@
 import Phaser from 'phaser';
 import '@fontsource/press-start-2p/400.css';
 import './styles.css';
+import './moggman.css';
+import './feed.css';
+import { watchUpdates } from './updates.js';
 import { MW, MH } from './config.js';
 import * as texMod from './textures.js';
 import * as audioMod from './audio.js';
 import { configureMusicFiles } from './audio.js';
 import * as dataMod from './data.js';
-import { loadSheets } from './textures.js';
+import { loadSheets, loadPortraitAtlas } from './textures.js';
 import { CHARACTERS } from './data.js';
 import GameScene from './scenes/GameScene.js';
 import { initTelegram } from './tg.js';
@@ -41,6 +44,7 @@ async function main() {
     sheets = [];
   }
   await loadSheets(sheets, BASE);
+  await loadPortraitAtlas(BASE);
   await configureMusicFiles(BASE);
   try {
     await document.fonts.load('8px "Press Start 2P"');
@@ -54,9 +58,9 @@ async function main() {
     width: MW,
     height: MH,
     backgroundColor: '#000000',
-    pixelArt: true,
+    pixelArt: false,
     roundPixels: true,
-    antialias: false,
+    antialias: true,
     disableContextMenu: true,
     scale: { mode: Phaser.Scale.NONE },
     scene: [Boot, GameScene],
@@ -93,6 +97,7 @@ async function main() {
       fit();
       if (import.meta.env.DEV) window.__game = { game, scene, SV, bus, play: playLevel, mods: { textures: texMod, audio: audioMod, data: dataMod }, ui: uiState, get S() { return scene.S; } };
       document.body.dataset.ready = '1';
+      watchUpdates(() => !uiState.inLevel);
     };
     if (scene.sys.isActive() && scene.mz) boot();
     else scene.events.once('create', boot);

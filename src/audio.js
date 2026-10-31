@@ -1,5 +1,4 @@
-// All audio is synthesized with the Web Audio API: original phonk / slowed+reverb / bass-boosted / nightcore
-// style tracks and meme-style voice lines. No audio files, no samples, no melodies from existing songs.
+// Web Audio mixer: built-in files, original synth fallback and user-selected local tracks.
 let ctx = null;
 let master;
 let duckG;
@@ -404,6 +403,36 @@ let musicBase = '';
 const bufCache = new Map();
 let fileSrc = null;
 let fileG;
+let customBuffer = null;
+let customName = '';
+let mode = 'original';
+let playbackGeneration = 0;
+let importGeneration = 0;
+const rates = { original: 1, slowed: 0.82, sped: 1.16 };
+export const customTrackName = () => customName;
+export const playbackMode = () => mode;
+export function setPlaybackMode(value) {
+  if (!(value in rates)) return;
+  mode = value;
+  if (fileSrc) fileSrc.playbackRate.setTargetAtTime(rates[mode], ctx.currentTime, 0.15);
+}
+export async function setCustomTrack(file) {
+  const request = ++importGeneration;
+  if (file.size > 40 * 1024 * 1024) throw new Error('Choose an audio file smaller than 40 MB.');
+  initAudio();
+  if (!ctx) throw new Error('Audio is not supported by this browser.');
+  let buffer;
+  try { buffer = await ctx.decodeAudioData(await file.arrayBuffer()); }
+  catch { throw new Error('Cannot play this file. Try MP3, WAV or M4A.'); }
+  if (request !== importGeneration) return;
+  if (buffer.duration > 900) throw new Error('Choose a track shorter than 15 minutes.');
+  customBuffer = buffer; customName = file.name;
+  if (wantTrack !== null) startMusic(wantTrack);
+}
+export function clearCustomTrack() {
+  ++importGeneration; customBuffer = null; customName = '';
+  if (wantTrack !== null) startMusic(wantTrack);
+}
 
 export async function configureMusicFiles(base) {
   try {
@@ -440,14 +469,15 @@ export const playingFile = () => !!fileSrc;
 
 export function startMusic(i) {
   wantTrack = i;
+  const generation = ++playbackGeneration;
   if (!ctx) return;
   stopTimer();
   stopFile();
-  if (fileMap[i]) {
+  if (customBuffer || fileMap[i]) {
     // synth plays until the file is decoded, then the file takes over
-    loadFile(i)
+    (customBuffer ? Promise.resolve(customBuffer) : loadFile(i))
       .then((buf) => {
-        if (wantTrack !== i || !ctx) return;
+        if (generation !== playbackGeneration || wantTrack !== i || !ctx) return;
         stopTimer();
         stopFile();
         if (!fileG) {
@@ -467,6 +497,7 @@ export function startMusic(i) {
         fileSrc = ctx.createBufferSource();
         fileSrc.buffer = buf;
         fileSrc.loop = true;
+        fileSrc.playbackRate.value = rates[mode];
         fileSrc.connect(fileG);
         fileSrc.start();
         revSend.gain.setTargetAtTime(0.1, ctx.currentTime, 0.1);
@@ -487,6 +518,7 @@ function stopTimer() {
 
 export function stopMusic() {
   wantTrack = null;
+  ++playbackGeneration;
   stopTimer();
   stopFile();
 }

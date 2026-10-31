@@ -1,27 +1,26 @@
-# Looksmaxxer Maze: Pixel Evolution
+# MOGGMAN
 
-Telegram Mini App, pixel Pac-Man with looksmaxxing memes. Phaser 3 + Vite.
+A mobile maze arcade for Telegram Mini Apps, built with Phaser and Vite.
 
-## Run locally
-1. Install Node.js 20+ (https://nodejs.org).
-2. `npm install`
-3. `npm run dev` and open http://127.0.0.1:5173
-4. Production: `npm run build` (folder `dist/`), `npm run preview`.
+Play: https://dk923781-del.github.io/looksmaxxer-maze/
+Telegram: https://t.me/looksmaxxmazebot/play
 
-## Tests
-`npm run test:unit` (mazes, XP, migration). E2E: `python tests/e2e.py` with Playwright (dev server running).
+## Version 2
 
-## Music and voices
-Everything is synthesized in `src/audio.js` (Web Audio): 6 original tracks (slowed+reverb menu/world 1, bass-boosted phonk, sigma dark phonk, sped-up nightcore, ultimate, boss). No existing songs, samples or melodies are used, so there is nothing to claim. Settings: music volume, effects volume, boss voice volume, bass boost, mute. Boss lines live in `VOICE` in `src/data.js` (Web Speech voice of the device, animalese blips as fallback).
+- TikTok-inspired dark interface with pink/cyan accents, portrait cards and meme captions.
+- Five generated character portraits, detailed game actors and matching bosses. Existing save and character identifiers remain compatible.
+- Aura mode: 40 pellets give six seconds of double score and increased speed. Close escapes reward 100 base points with a per-enemy cooldown.
+- Six bundled music tracks, separate music/effect volume, optional local music selection and normal/slowed/sped playback.
+- New releases are detected on focus and once per minute. Active runs finish before reloading. A pre-v2 window needs to be reopened once.
 
-## Replace character sprites
-Sheets are generated from the portraits by `python tools/make_sprites.py` (needs Pillow): 28x30 frames, 10 per row, 4 rows (stages). You can also draw them by hand: same layout, shirt/accent colours must match `pal` in `src/data.js` so skins can recolour them.
+Hunter Eyes and ASCEND recordings are **not bundled**: redistribution permission was not obtained. Existing audio credits are in MUSIC_LICENSES.md. Local music selection currently lasts until page reload.
 
-## (old procedural layout)
-Put `public/assets/characters/<id>.png` (ids: valera_broke, moggsu, zetaboss, hulioboss, dildoboss), 160x64 px: 10 frames of 16x16 per row, one row per evolution stage (1, 26, 61, 100): `down0 down1 up0 up1 left0 left1 right0 right1 hurt win`. Then add the id to `public/assets/characters/manifest.json`: `{ "sheets": ["moggsu"] }`. Portraits on cards: `portrait` field in `src/data.js`.
+## Development
 
-## Deploy
-GitHub Pages via `.github/workflows/deploy.yml` (Settings > Pages > Source: GitHub Actions).
+Node 22+, `npm ci`, `npm run dev`. Run `npm run test:unit` and `npm run build`. Browser regression tests are Python Playwright scripts in tests/.
 
-## Telegram
-@BotFather: `/newbot`, then `/newapp` (or Menu Button) with the Pages URL.
+Push main to deploy through GitHub Pages. Bump the build identifier in vite.config.js and public/version.json for each release. Telegram opens the same hosted site; editing game source and deploying updates the Mini App. This is not an in-game code editor.
+
+## Art
+
+public/assets/characters/moggers-v2.png is generated portrait artwork. Egor and Martin references: https://www.russianmog.ru/assets/egor.jpg and https://www.russianmog.ru/assets/martin.jpg; other references came from the original project. These are stylized characters, not a claim of endorsement. Hoola identity was not verified; Hulio uses the original reference instead.

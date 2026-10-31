@@ -17,74 +17,40 @@ const P = (ctx, x, y, w, h, c) => {
 
 // ---------------- player ----------------
 function drawPlayer(ctx, dir, f, pal, stage, mode) {
-  const dark = '#14121c';
-  const walk = mode === 'walk';
-  const bw = stage >= 3 ? 10 : 8;
-  const bx = stage >= 3 ? 3 : 4;
-  const lift = walk ? f : 0;
-  // legs
-  if (dir === 'l' || dir === 'r') {
-    P(ctx, 5 + (lift ? 1 : 0), 13, 3, 3, dark);
-    P(ctx, 8 - (lift ? 1 : 0), 13, 3, 3, '#2a2638');
-  } else {
-    P(ctx, 5, 13 - (lift ? 1 : 0), 2, 3 + (lift ? 0 : 0), dark);
-    P(ctx, 9, 13 - (lift ? 0 : 1), 2, 3, dark);
+  const p = (x,y,w,h,c) => P(ctx,x,y,w,h,c);
+  const bob = mode === 'walk' ? f : 0;
+  const shade = '#b57658';
+  // Broad shoulders, boots, metal neck chain; each palette is a distinct character.
+  p(3,10,10,4,pal.shirt); p(2,11+bob,2,3,pal.skin); p(12,11-bob,2,3,pal.skin);
+  p(4,14,3,2,'#171c19'); p(9,14-bob,3,2,'#171c19');
+  p(4,10,8,1,pal.accent); p(7,10,2,3,'#c9d1c5');
+  p(3,1,10,7,pal.skin); p(4,8,8,1,shade); p(5,9,6,1,pal.skin);
+  // Angular jaw, temple shadows, overhanging fringe.
+  p(3,5,1,3,shade); p(12,5,1,3,shade);
+  p(3,0,10,3,pal.hair); p(2,2,2,3,pal.hair); p(12,2,2,3,pal.hair);
+  p(5,2,3,1,pal.hair); p(9,2,3,2,pal.hair);
+  if (dir === 'u') { p(3,1,10,7,pal.hair); p(5,7,6,1,shade); }
+  else {
+    const dx = dir === 'l' ? -1 : dir === 'r' ? 1 : 0;
+    p(4+dx,4,3,1,'#20241f'); p(9+dx,4,3,1,'#20241f');
+    p(5+dx,5,2,1,pal.accent); p(9+dx,5,2,1,pal.accent);
+    p(7+dx,6,1,1,shade); p(6+dx,8,4,1,'#6b493a');
+    if (stage >= 2) { p(4,4,8,2,'#101811'); p(5,4,2,1,pal.accent); p(9,4,2,1,pal.accent); }
   }
-  // body
-  P(ctx, bx, 8, bw, 5, pal.shirt);
-  if (stage >= 3) P(ctx, bx, 8, bw, 1, pal.accent);
-  if (stage >= 2) P(ctx, 7, 9, 2, 1, pal.accent); // chain
-  // arms
-  const armY = mode === 'win' ? 5 : 9 + (walk && f ? 1 : 0);
-  const armH = mode === 'win' ? 4 : 3;
-  P(ctx, bx - 1, armY, 1, armH, pal.skin);
-  P(ctx, bx + bw, mode === 'win' ? 5 : 9 + (walk && !f ? 1 : 0), 1, armH, pal.skin);
-  // head
-  P(ctx, 4, 1, 8, 7, pal.skin);
-  // hair
-  if (dir === 'u') {
-    P(ctx, 4, 0, 8, 7, pal.hair);
-    P(ctx, 3, 1, 1, 4, pal.hair);
-    P(ctx, 12, 1, 1, 4, pal.hair);
-  } else {
-    P(ctx, 4, 0, 8, 3, pal.hair);
-    P(ctx, 3, 1, 1, 4, pal.hair);
-    P(ctx, 12, 1, 1, 4, pal.hair);
-    if (dir === 'l') P(ctx, 8, 2, 4, 5, pal.hair);
-    if (dir === 'r') P(ctx, 4, 2, 4, 5, pal.hair);
-    P(ctx, 5, 2, 6, 1, pal.hair);
-  }
-  // face
-  if (dir === 'd') {
-    P(ctx, 6, 4, 1, 1, pal.eye);
-    P(ctx, 9, 4, 1, 1, pal.eye);
-    P(ctx, 7, 6, 2, 1, '#a0604a');
-  } else if (dir === 'l') {
-    P(ctx, 5, 4, 1, 1, pal.eye);
-    P(ctx, 4, 6, 2, 1, '#a0604a');
-  } else if (dir === 'r') {
-    P(ctx, 10, 4, 1, 1, pal.eye);
-    P(ctx, 10, 6, 2, 1, '#a0604a');
-  }
-  if (stage >= 2 && dir !== 'u') {
-    if (dir === 'd') P(ctx, 5, 4, 6, 1, '#05050a');
-    else if (dir === 'l') P(ctx, 4, 4, 4, 1, '#05050a');
-    else P(ctx, 8, 4, 4, 1, '#05050a');
-  }
-  if (stage >= 4) {
-    P(ctx, 4, -1, 8, 1, '#ffd23f');
-    for (const x of [4, 7, 10]) P(ctx, x, -2, 2, 1, '#ffd23f');
-    P(ctx, 4, 0, 8, 1, '#ffd23f');
-  }
-  if (mode === 'hurt') {
-    ctx.globalCompositeOperation = 'source-atop';
-    P(ctx, 0, 0, 16, 16, 'rgba(255,60,60,0.65)');
-    ctx.globalCompositeOperation = 'source-over';
-  }
+  // Each fighter has a readable signature even at maze scale.
+  if (pal.identity === 'valera_broke') { p(2,0,12,2,'#657447'); p(1,2,7,1,'#869950'); }
+  if (pal.identity === 'moggsu') { p(4,0,3,1,pal.accent); p(9,0,3,1,pal.accent); p(5,11,1,3,'#899781'); p(10,11,1,3,'#899781'); }
+  if (pal.identity === 'zetaboss') { p(4,4,8,2,'#0b120b'); p(5,4,6,1,'#c5f65a'); p(3,10,10,2,'#33443b'); }
+  if (pal.identity === 'hulioboss') { p(1,3,2,5,'#a6ebec'); p(13,3,2,5,'#a6ebec'); p(13,7,2,1,'#ff88ca'); }
+  if (pal.identity === 'dildoboss') { p(4,0,8,2,'#f4dd94'); p(3,0,2,3,'#f4dd94'); p(11,0,2,3,'#f4dd94'); p(7,11,2,2,'#ffe58b'); }
+  if (stage >= 3) { p(1,10,2,3,pal.accent); p(13,10,2,3,pal.accent); }
+  if (stage >= 4) { p(3,0,10,1,'#f4dc83'); p(3,0,2,2,'#f4dc83'); p(7,0,2,2,'#f4dc83'); p(11,0,2,2,'#f4dc83'); }
+  if (mode === 'win') { p(1,7,2,5,pal.skin); p(13,7,2,5,pal.skin); }
+  if (mode === 'hurt') { ctx.globalCompositeOperation='source-atop'; p(0,0,16,16,'rgba(255,70,60,.6)'); ctx.globalCompositeOperation='source-over'; }
 }
 
 export function charPal(charId, skinId) {
-  const base = CHAR_BY_ID[charId].pal;
+  const base = { ...CHAR_BY_ID[charId].pal, identity: charId };
   const sk = SKIN_BY_ID[skinId];
   return sk && sk.shift ? { ...base, ...sk.shift } : base;
 }
@@ -93,6 +59,28 @@ export const FW = 28;
 export const FH = 30;
 export const FRAME_NAMES = ['d0', 'd1', 'u0', 'u1', 'l0', 'l1', 'r0', 'r1', 'hurt', 'win'];
 const SHEETS = {};
+const PORTRAIT_ORDER = ['valera_broke','moggsu','zetaboss','hulioboss','dildoboss'];
+let portraitAtlas = null;
+const portraitCache = new Map();
+export function loadPortraitAtlas(base) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => { portraitAtlas = img; for (const id of PORTRAIT_ORDER) SHEETS[id] = img; resolve(); };
+    img.onerror = () => resolve();
+    img.src = `${base}assets/characters/moggers-v2.png`;
+  });
+}
+function drawPortrait(ctx, id, x,y,w,h) {
+  const n = PORTRAIT_ORDER.indexOf(id), cw=portraitAtlas.width/3,ch=portraitAtlas.height/2;
+  ctx.drawImage(portraitAtlas,n%3*cw,Math.floor(n/3)*ch,cw,ch,x,y,w,h);
+}
+export function portraitURL(id) {
+  if (!portraitAtlas) return playerPreviewURL(id,'base',1,6);
+  if (portraitCache.has(id)) return portraitCache.get(id);
+  const c=document.createElement('canvas');c.width=c.height=512;
+  drawPortrait(c.getContext('2d'),id,0,0,512,512);
+  const url=c.toDataURL('image/webp',.9);portraitCache.set(id,url);return url;
+}
 export const hasSheet = (id) => !!SHEETS[id];
 
 export function loadSheets(ids, base) {
@@ -116,6 +104,25 @@ const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 
 // one frame of a sheet, recoloured for the chosen skin (shirt/accent are exact marker colours)
 export function sheetFrame(charId, skinId, stage, i) {
+  if (portraitAtlas && SHEETS[charId] === portraitAtlas) {
+    const c=document.createElement('canvas');c.width=FW;c.height=FH;
+    const ctx=c.getContext('2d'),pal=charPal(charId,skinId);
+    ctx.imageSmoothingEnabled=true;
+    const bob=i<8?i%2:0;
+    ctx.fillStyle=pal.shirt;ctx.fillRect(7,21,14,7);
+    ctx.fillStyle=pal.accent;ctx.fillRect(7,21,14,2);
+    ctx.fillStyle='#e4d4c5';ctx.fillRect(4,23-bob,3,4);ctx.fillRect(21,23+bob,3,4);
+    ctx.fillStyle='#15151e';ctx.fillRect(8,27,4,3-bob);ctx.fillRect(16,27+bob,4,3-bob);
+    ctx.save();ctx.beginPath();ctx.ellipse(14,12+bob,11,12,0,0,Math.PI*2);ctx.clip();
+    if(i===4||i===5){ctx.translate(28,0);ctx.scale(-1,1);}
+    drawPortrait(ctx,charId,2,bob,24,24);ctx.restore();
+    if(stage>=2){ctx.strokeStyle=pal.accent;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(14,12+bob,11.5,12.5,0,0,Math.PI*2);ctx.stroke();}
+    if(stage>=3){ctx.fillStyle='#eee8ed';ctx.fillRect(10,23,8,1);ctx.fillRect(13,24,2,2);}
+    if(stage>=4){ctx.fillStyle='#ffd982';ctx.fillRect(8,0,12,2);for(const x of [8,13,18])ctx.fillRect(x,0,2,4);}
+    if(i===8){ctx.globalCompositeOperation='source-atop';ctx.fillStyle='#ff45664d';ctx.fillRect(0,0,FW,FH);}
+    if(i===9){ctx.fillStyle=pal.skin;ctx.fillRect(2,16,3,8);ctx.fillRect(23,16,3,8);}
+    return c;
+  }
   const img = SHEETS[charId];
   const row = Math.min(stage, Math.floor(img.height / FH)) - 1;
   const c = document.createElement('canvas');
@@ -123,7 +130,7 @@ export function sheetFrame(charId, skinId, stage, i) {
   c.height = FH;
   const ctx = c.getContext('2d');
   ctx.drawImage(img, i * FW, row * FH, FW, FH, 0, 0, FW, FH);
-  const base = CHAR_BY_ID[charId].pal;
+  const base = { ...CHAR_BY_ID[charId].pal, identity: charId };
   const pal = charPal(charId, skinId);
   const map = [];
   for (const k of ['shirt', 'accent']) if (base[k] !== pal[k]) map.push([hexToRgb(base[k]), hexToRgb(pal[k])]);
@@ -315,8 +322,13 @@ function drawBonus(ctx, letter, color) {
 }
 
 export function buildBaseTextures(scene) {
-  for (const t of ENEMY_TYPES)
-    for (const f of [0, 1]) mk(scene, `en_${t}_${f}`, 16, 16, (ctx) => drawEnemy(ctx, t, f));
+  for (const t of ENEMY_TYPES) {
+    const bossId = {zeta:'zetaboss', hulio:'hulioboss', dildo:'dildoboss'}[t];
+    for (const f of [0, 1]) {
+      if (bossId && portraitAtlas) mk(scene, `en_${t}_${f}`, FW, FH, ctx => ctx.drawImage(sheetFrame(bossId, 'base', 3, f),0,0));
+      else mk(scene, `en_${t}_${f}`, 16, 16, ctx => drawEnemy(ctx,t,f));
+    }
+  }
   for (const f of [0, 1]) {
     mk(scene, `en_fr_${f}`, 16, 16, (ctx) => drawFright(ctx, f, false));
     mk(scene, `en_frw_${f}`, 16, 16, (ctx) => drawFright(ctx, f, true));
@@ -328,7 +340,7 @@ export function buildBaseTextures(scene) {
     P(ctx, 10, 6, 1, 2, '#2a3cff');
   });
   mk(scene, 'pellet', 16, 16, (ctx) => {
-    P(ctx, 7, 7, 2, 2, '#ffe9c4');
+    P(ctx, 7, 7, 2, 2, '#d5e9b9');
   });
   for (const f of [0, 1, 2]) {
     mk(scene, `coin_${f}`, 16, 16, (ctx) => {

@@ -8,20 +8,20 @@ export function setVibration(v) {
 }
 
 export function initTelegram() {
-  if (!tg) return;
+  if (!isTelegram) return;
   try {
     tg.ready();
     tg.expand();
     if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
-    if (tg.setHeaderColor) tg.setHeaderColor('#07040f');
-    if (tg.setBackgroundColor) tg.setBackgroundColor('#07040f');
+    if (tg.setHeaderColor) tg.setHeaderColor('#0c0d15');
+    if (tg.setBackgroundColor) tg.setBackgroundColor('#0c0d15');
   } catch (e) {
     /* ignore */
   }
 }
 
 export function haptic(kind) {
-  if (!vibration || !tg || !tg.HapticFeedback) return;
+  if (!vibration || !isTelegram || !tg.HapticFeedback) return;
   try {
     const h = tg.HapticFeedback;
     if (kind === 'collect') h.impactOccurred('light');
@@ -36,7 +36,7 @@ export function haptic(kind) {
 
 let backHandler = null;
 export function setBack(fn) {
-  if (!tg || !tg.BackButton) return;
+  if (!isTelegram || !tg.isVersionAtLeast('6.1') || !tg.BackButton) return;
   try {
     if (backHandler) tg.BackButton.offClick(backHandler);
     backHandler = fn;
@@ -51,7 +51,7 @@ export function setBack(fn) {
 
 export function cloudGet(key) {
   return new Promise((resolve) => {
-    if (!tg || !tg.CloudStorage || !tg.CloudStorage.getItem) return resolve(null);
+    if (!isTelegram || !tg.isVersionAtLeast('6.9') || !tg.CloudStorage || !tg.CloudStorage.getItem) return resolve(null);
     let done = false;
     const t = setTimeout(() => {
       if (!done) {
@@ -75,7 +75,7 @@ export function cloudGet(key) {
 }
 
 export function cloudSet(key, val) {
-  if (!tg || !tg.CloudStorage || !tg.CloudStorage.setItem) return;
+  if (!isTelegram || !tg.isVersionAtLeast('6.9') || !tg.CloudStorage || !tg.CloudStorage.setItem) return;
   try {
     tg.CloudStorage.setItem(key, val, () => {});
   } catch (e) {

@@ -154,6 +154,8 @@ export default class GameScene extends Phaser.Scene {
       score: 0,
       mult: 1,
       chain: 0,
+      aura: 0,
+      rushT: 0,
       lastPick: -9,
       lives: 3,
       nextLife: 10000,
@@ -244,7 +246,7 @@ export default class GameScene extends Phaser.Scene {
     const px = T(x);
     const py = T(y);
     g.fillStyle(wd.fill, a);
-    g.fillRect(px, py, TILE, TILE);
+    g.fillRoundedRect(px + .5, py + .5, TILE - 1, TILE - 1, 3);
     const open = (nx, ny) => inb(nx, ny) && grid[idx(nx, ny)] !== 1;
     const edge = (cond, rx, ry, rw, rh, rx2, ry2) => {
       if (!cond) return;
@@ -567,6 +569,7 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
     S.time += dt;
+    S.rushT = Math.max(0, S.rushT - dt);
     // combo decay
     if (S.chain > 0 && S.time - S.lastPick > 1.2) {
       S.chain = 0;
@@ -623,6 +626,7 @@ export default class GameScene extends Phaser.Scene {
   playerSpeed() {
     const S = this.S;
     let m = this.ch.st.speedMul;
+    if (S.rushT > 0) m *= 1.15;
     if (this.hasBonus('chad')) m *= 1.3;
     if (S.abilT > 0 && S.abilId === 'chad_dash') m *= 1.4;
     const P = this.P;
@@ -708,7 +712,7 @@ export default class GameScene extends Phaser.Scene {
 
   addScore(n) {
     const S = this.S;
-    S.score += Math.round(n * this.ch.st.scoreMul);
+    S.score += Math.round(n * this.ch.st.scoreMul * (S.rushT > 0 ? 2 : 1));
     while (S.score >= S.nextLife) {
       S.nextLife += 10000;
       if (S.lives < MAX_LIVES) {
@@ -749,6 +753,12 @@ export default class GameScene extends Phaser.Scene {
         this.pelSpr.get(i).destroy();
         this.pelSpr.delete(i);
         this.chainPick();
+        if (S.rushT <= 0 && ++S.aura >= 40) {
+          S.aura = 0; S.rushT = 6;
+          this.banner('AURA MODE  /  x2', '#84edf0', 1.3);
+          this.burst(P.x*TILE+8, P.y*TILE+8, 0x84edf0, 18, 40);
+          sfx.boom(0.4);
+        }
         this.addScore(10 * S.mult);
         this.addXp(1);
         SV.bumpStat('pellets');
@@ -1271,6 +1281,17 @@ export default class GameScene extends Phaser.Scene {
     for (const e of this.enemies) {
       if (e.state === 'wait' || e.state === 'eyes') continue;
       const d = Math.hypot(e.x - P.x, e.y - P.y);
+      // Reward a close escape only after the player has moved away again.
+      if (e.state === 'normal' && !e.boss && !phased && S.invuln <= 0 && !S.shield && S.abilShield <= 0) {
+        if (d > 0.62 && d < 1.05 && S.time >= (e.nearMissAfter || 0)) e.nearMiss = true;
+        if (d > 1.6 && e.nearMiss) {
+          e.nearMiss = false; e.nearMissAfter = S.time + 8;
+          this.addScore(100);
+          this.popup(P.x*TILE+8, P.y*TILE-6, 'NOT TODAY +100', '#84edf0');
+          sfx.xp();
+        }
+      } else e.nearMiss = false;
+      if (d <= 0.62) e.nearMiss = false;
       if (d > 0.62) continue;
       if (e.state === 'fright') {
         if (e.boss) {
@@ -1366,6 +1387,7 @@ export default class GameScene extends Phaser.Scene {
     SV.S().stats.deaths++;
     S.state = 'dying';
     S.dieT = 1.2;
+    S.aura = 0; S.rushT = 0;
     P.spr.setTexture(this.ch.tex + '_hurt');
     sfx.hurt();
     haptic('damage');
@@ -1625,6 +1647,8 @@ export default class GameScene extends Phaser.Scene {
       bp: d.inv.blackpill,
       score: S.score,
       mult: S.mult,
+      aura: S.aura,
+      rushT: S.rushT,
       pct: Math.round(((total - S.pelletsLeft) / total) * 100),
       bonuses: S.bonuses.map((b) => ({ type: b.type, t: b.t, max: b.max })),
       ability: { name: abil.name, cd: Math.max(0, S.abilCd), cdMax: S.abilCdMax || abil.cd, active: S.abilT > 0 ? S.abilT : 0 },

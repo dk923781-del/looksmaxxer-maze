@@ -452,14 +452,14 @@ with sync_playwright() as p:
         pg.click('#credits-close')
         pg.close()
 
-    @run('characters use the face sprite sheets; skins recolour; 4 evolution rows')
+    @run('Moggman characters have distinct previews, skins and evolution')
     def _():
         pg = new_page(b)
         r = js(pg, '''(async()=>{ const t = window.__game.mods.textures; const out={};
-          for (const id of ['valera_broke','moggsu','zetaboss','hulioboss','dildoboss']) out[id]=t.hasSheet(id);
+          const ids=['valera_broke','moggsu','zetaboss','hulioboss','dildoboss']; const images=ids.map(id=>t.playerPreviewURL(id,'base',1,2)); out.unique=new Set(images).size===5;
           const a=t.playerPreviewURL('moggsu','base',1,2), b=t.playerPreviewURL('moggsu','neon',1,2), c=t.playerPreviewURL('moggsu','base',2,2);
           out.skinDiffers = a!==b; out.stageDiffers = a!==c; return out; })()''')
-        assert all(r[k] for k in ['valera_broke', 'moggsu', 'zetaboss', 'hulioboss', 'dildoboss', 'skinDiffers', 'stageDiffers']), r
+        assert all(r[k] for k in ['unique', 'skinDiffers', 'stageDiffers']), r
         pg.close()
 
     @run('boss voice lines exist for every boss')

@@ -2,8 +2,8 @@ import { bus } from './bus.js';
 import * as SV from './save.js';
 import { levelFromXp, stageForLevel, xpForLevel } from './config.js';
 import { MUSIC_CREDITS, WORLDS, levelDef, CHARACTERS, CHAR_BY_ID, SKINS, SKIN_BY_ID, ITEMS, SKILL_BRANCHES, LEGENDARY, STAGE_NAMES, QUEST_POOL, BONUS_TYPES, BOSSES } from './data.js';
-import { playerPreviewURL } from './textures.js';
-import { sfx, initAudio, setVolumes, startMusic, stopMusic } from './audio.js';
+import { playerPreviewURL, portraitURL } from './textures.js';
+import { sfx, initAudio, setVolumes, startMusic, stopMusic, setCustomTrack, clearCustomTrack, customTrackName, setPlaybackMode, playbackMode, levelNow } from './audio.js';
 import { setBack, setVibration, haptic } from './tg.js';
 
 const $ = (s) => document.querySelector(s);
@@ -37,6 +37,12 @@ export function initUI(scene) {
     if (document.hidden && ui.inLevel && !ui.paused) ui.scene.pause();
   });
   bindControls();
+  let visualFrame = 0;
+  const pulse = () => {
+    if (++visualFrame % 3 === 0) document.documentElement.style.setProperty('--beat', Math.min(1, levelNow() * 7).toFixed(3));
+    requestAnimationFrame(pulse);
+  };
+  pulse();
   applySettings();
   showMain(true);
 }
@@ -187,6 +193,8 @@ const actions = {
     applySettings();
     rerender();
   },
+  clearmusic: () => { clearCustomTrack(); rerender(); },
+  musicmode: (d) => { setPlaybackMode(d.mode); rerender(); },
   reset: () =>
     showConfirm('RESET ALL PROGRESS?', 'Characters, coins, levels and skills will be erased.', () => {
       SV.resetSave();
@@ -196,7 +204,7 @@ const actions = {
       toast('Progress reset');
     }),
   credits: () => {
-    openModal(`<h2>CREDITS</h2><div style="font-size:8px;line-height:1.9">${MUSIC_CREDITS.map((c) => `<div class="kv" style="display:block"><span class="dim">${c.slot}</span><br><b>${c.title}</b> by ${c.artist}</div>`).join('')}<p class="dim">Music: Pixabay Content License. SFX, voices and in-game tracks are synthesized in the game.</p></div><button class="btn" data-act="closemodal" id="credits-close">CLOSE</button>`);
+    openModal(`<h2>CREDITS</h2><div style="font-size:8px;line-height:1.9">${MUSIC_CREDITS.map((c) => `<div class="kv" style="display:block"><span class="dim">${c.slot}</span><br><b>${c.title}</b> by ${c.artist}</div>`).join('')}<p class="dim">Music: Pixabay Content License. SFX and fallback music are synthesized. Local audio is chosen by the player.</p></div><button class="btn" data-act="closemodal" id="credits-close">CLOSE</button>`);
   },
   resume: () => ui.scene.resume(),
   restart: () => {
@@ -224,7 +232,7 @@ const actions = {
     showResult(ui.pendingResult, true);
   },
   share: () => {
-    import('./tg.js').then((m) => m.shareLink('https://t.me/share/url?url=' + encodeURIComponent(location.href) + '&text=' + encodeURIComponent('I am a Looksmaxxer Maze mogger. Can you beat me?')));
+    import('./tg.js').then((m) => m.shareLink('https://t.me/share/url?url=' + encodeURIComponent(location.href) + '&text=' + encodeURIComponent('Stay unmogged. Beat my run in MOGGMAN.')));
   },
 };
 
@@ -256,17 +264,17 @@ export function showMain(reset) {
   const url = playerPreviewURL(id, c.skin, stage, 6);
   const title = li.level >= 100 ? 'ULTIMATE MOGGER' : STAGE_NAMES[stage];
   setScreen(
-    `<div class="row" style="justify-content:flex-end"><span class="chip gold"><i class="coin"></i><span id="bank">${fmt(S().coins)}</span></span></div>
-     <div class="title">LOOKSMAXXER<br>MAZE</div><div class="sub">PIXEL EVOLUTION</div>
-     <div class="preview"><img alt="" src="${url}"><div style="font-size:9px;margin-top:6px">${def.name} <span class="gold">Lv ${li.level}</span></div>
-     <div class="dim" style="font-size:7px;margin-top:4px">${title}</div>
-     <div class="xpbar" style="max-width:220px;margin:6px auto 0"><i style="width:${li.need ? (li.into / li.need) * 100 : 100}%"></i></div></div>
-     <button class="btn primary" data-act="play" id="btn-play">PLAY</button>
-     <button class="btn" data-act="chars" id="btn-chars">CHARACTER SELECT</button>
-     <button class="btn" data-act="upgrades" id="btn-upgrades">UPGRADES${SV.skillPointsLeft(id) > 0 ? ` <span class="gold">(${SV.skillPointsLeft(id)})</span>` : ''}</button>
-     <button class="btn" data-act="shop" id="btn-shop">SHOP</button>
-     <button class="btn" data-act="quests" id="btn-quests">QUESTS${questsReady() ? ' <span class="gold">!</span>' : ''}</button>
-     <button class="btn" data-act="settings" id="btn-settings">SETTINGS</button>`,
+    `<div class="feed-header"><span class="feed-logo">moggman<span>✦</span></span><span class="chip"><i class="coin"></i><span id="bank">${fmt(S().coins)}</span></span><button class="gear" data-act="settings" id="btn-settings" aria-label="Музыка и настройки">♫</button></div>
+     <div class="feed-heading"><h1>Твой выход.</h1><span>Не дай себя могнуть.</span></div>
+     <div class="edit-card"><img class="edit-portrait" src="${portraitURL(id)}" alt="${def.name}"><div class="edit-shade"></div>
+       <div class="edit-topline"><span class="live-dot"></span> MOG EDIT <span>LV ${li.level}</span></div>
+       <div class="edit-sticker">аура +999 ✨</div><div class="edit-side"><span>✦</span><span>◈</span><span>☄</span></div>
+       <div class="edit-caption"><span class="pov">POV: зашёл на один уровень</span><h2>${def.name}</h2><p>${def.tag}</p><span class="edit-hashtags">#moggman #ещёодинзабег</span></div>
+     </div>
+     <div class="progress-line"><span>${title}</span><span>Уровень ${li.level} / 100</span></div><div class="xpbar"><i style="width:${li.need ? li.into/li.need*100 : 100}%"></i></div>
+     <button class="btn primary play-cta" data-act="play" id="btn-play"><span>ПОГНАЛИ</span><span>▶</span></button>
+     <div class="feed-nav"><button data-act="chars" id="btn-chars"><span>◉</span>Моггеры</button><button data-act="upgrades" id="btn-upgrades"><span>✦</span>Эволюция${SV.skillPointsLeft(id)>0?' +':''}</button><button data-act="shop" id="btn-shop"><span>◇</span>Магазин</button><button data-act="quests" id="btn-quests"><span>☑</span>Задания${questsReady()?' !':''}</button></div>
+     <div class="feed-footer">Лови ауру. Теряй счёт времени.</div>`,
     { coins: false },
   );
   $('#hud').hidden = true;
@@ -317,7 +325,7 @@ function showPlay() {
      <div class="card"><h3 style="color:#${wd.neon.toString(16).padStart(6, '0')}">${wd.name}</h3><span class="dim">${worldBlurb(w)}</span></div>
      <div class="lvgrid">${lv}</div>
      <button class="btn ${d.hard && st.hardOk ? 'gold' : ''} ${st.hardOk ? '' : 'off'}" data-act="hard" id="btn-hard">HARD MODE: ${d.hard && st.hardOk ? 'ON (x1.5 rewards)' : st.hardOk ? 'OFF' : 'LOCKED (Lv 61)'}</button>
-     <div class="dim" style="font-size:7px;line-height:1.7">Stars: no deaths / fast clear / every coin. Boss levels end when the boss is defeated: eat an Energy Sphere, then touch the boss.</div>`,
+     <div class="dim" style="font-size:7px;line-height:1.7">Collect 40 dots for MOG RUSH: 6s of double score and +15% speed. Escape a close hunter for +100. Stars: no deaths / fast clear / every coin. Boss: eat an Energy Sphere, then touch the boss.</div>`,
     { back: true, title: 'SELECT LEVEL' },
   );
 }
@@ -358,14 +366,12 @@ function showChars() {
     }
     const stage = owned ? charHeader(ch.id).stage : 1;
     const skin = owned ? d.chars[ch.id].skin : 'base';
-    const img = ch.portrait
-      ? `<img class="portrait" alt="" src="${BASE}assets/characters/${ch.portrait}" onerror="this.src='${playerPreviewURL(ch.id, 'base', 1, 4)}'">`
-      : `<img class="portrait" alt="" src="${playerPreviewURL(ch.id, skin, stage, 4)}">`;
+    const img = `<img class="portrait" alt="${ch.name}" src="${portraitURL(ch.id)}">`;
     return `<div class="card ${d.sel === ch.id ? 'sel' : ''}"><div class="row">${img}<div class="grow"><h3>${ch.name}</h3><div class="dim">${ch.tag}</div><div>${info}</div></div></div>
       <div style="margin-top:6px"><b class="cyan">${ch.ability.name}</b> <span class="dim">(cd ${ch.ability.cd}s)</span><br>${ch.ability.text}</div>
       <div class="row" style="margin-top:8px;justify-content:space-between"><img alt="" style="height:64px;width:auto;image-rendering:pixelated" src="${playerPreviewURL(ch.id, skin, stage, 3)}">${action}</div></div>`;
   }).join('');
-  setScreen(cards, { back: true, title: 'CHARACTERS' });
+  setScreen(cards, { back: true, title: 'Выбери своего' });
 }
 
 function showUpgrades() {
@@ -458,7 +464,8 @@ function showQuests() {
 function showSettings() {
   const st = S().settings;
   setScreen(
-    `<div class="card"><div>Music volume</div><input id="s-music" class="slider" type="range" min="0" max="100" value="${Math.round(st.music * 100)}"></div>
+    `<div class="radio-card"><small>YOUR SOUND. YOUR AURA.</small><h3>Bring your edit.</h3><p>Choose a track from your device. It stays on this device and plays throughout the game.</p><label class="btn primary file-label">Choose audio<input id="custom-track" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg"></label><p id="track-name"></p><div class="radio-modes">${['original','slowed','sped'].map(m => `<button class="btn small ${playbackMode()===m?'active':''}" data-act="musicmode" data-mode="${m}">${m}</button>`).join('')}</div><button class="btn small" data-act="clearmusic">Use built-in soundtrack</button><p class="dim">Local track lasts until refresh. Slowed changes pitch and tempo.</p></div>
+     <div class="card"><div>Music volume</div><input id="s-music" class="slider" type="range" min="0" max="100" value="${Math.round(st.music * 100)}"></div>
      <div class="card row"><span class="grow">Bass boost</span><button class="btn small toggle" data-act="toggle" data-k="bass" id="t-bass">${st.bass ? 'ON' : 'OFF'}</button></div>
      <div class="card"><div>Effects volume</div><input id="s-sfx" class="slider" type="range" min="0" max="100" value="${Math.round(st.sfx * 100)}"></div>
      <div class="card"><div>Boss voice volume</div><input id="s-voice" class="slider" type="range" min="0" max="100" value="${Math.round(st.voice * 100)}"></div>
@@ -467,9 +474,16 @@ function showSettings() {
      <div class="card row"><span class="grow">Mobile controls</span><button class="btn small toggle" data-act="toggle" data-k="controls" id="t-ctl">${st.controls === 'dpad' ? 'D-PAD' : 'SWIPE'}</button></div>
      <button class="btn" data-act="credits" id="btn-credits">CREDITS</button>
      <button class="btn" style="border-color:var(--red);color:var(--red)" data-act="reset" id="btn-reset">RESET PROGRESS</button>
-     <div class="dim" style="font-size:7px;text-align:center;line-height:1.8">Looksmaxxer Maze: Pixel Evolution<br>Keys: arrows / WASD, Space = ability, Esc = pause</div>`,
-    { back: true, title: 'SETTINGS' },
+     <div class="dim" style="font-size:7px;text-align:center;line-height:1.8">MOGGMAN<br>Keys: arrows / WASD, Space = ability, Esc = pause</div>`,
+    { back: true, title: 'MOG RADIO' },
   );
+  $('#track-name').textContent = customTrackName() || 'Built-in phonk soundtrack';
+  $('#custom-track').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const status = $('#track-name'); status.textContent = 'Loading track…';
+    try { await setCustomTrack(file); status.textContent = customTrackName(); toast('Your track is ready'); }
+    catch (err) { status.textContent = err.message; }
+  });
   const bind = (id, key) => {
     const el = $(id);
     el.addEventListener('input', () => {
@@ -506,7 +520,7 @@ function showConfirm(title, text, yes) {
 }
 
 function showPause() {
-  openModal(`<h2>PAUSED</h2><button class="btn primary" data-act="resume" id="btn-resume">RESUME</button><button class="btn" data-act="restart" id="btn-restart">RESTART LEVEL</button><button class="btn" data-act="menu" id="btn-quit">EXIT TO MENU</button>`);
+  openModal(`<h2>Аура на паузе</h2><button class="btn primary" data-act="resume" id="btn-resume">RESUME</button><button class="btn" data-act="restart" id="btn-restart">RESTART LEVEL</button><button class="btn" data-act="menu" id="btn-quit">EXIT TO MENU</button>`);
 }
 
 function exitToMenu() {
@@ -539,7 +553,7 @@ function showResult(r, afterEnding) {
   const canNext = nx && levelUnlocked(nx[0], nx[1]);
   const lvUp = r.lvAfter > r.lvBefore;
   const unlock = r.unlockedChar ? `<div class="card sel green" style="text-align:center">${CHAR_BY_ID[r.unlockedChar].name} is now available in the SHOP (${fmt(CHAR_BY_ID[r.unlockedChar].price)})</div>` : '';
-  openModal(`<h2>${r.boss ? 'BOSS DEFEATED' : 'LEVEL CLEAR'}${r.hard ? ' (HARD)' : ''}</h2>
+  openModal(`<h2>${r.boss ? 'БОСС МОГНУТ' : 'ЧИСТЫЙ МOГ'}${r.hard ? ' (HARD)' : ''}</h2>
     <div class="bigstars">${stars3(r.stars)}</div>
     <div class="kv"><span>No deaths</span><span>${r.stars[0] ? 'YES' : 'no'}</span></div>
     <div class="kv"><span>Time ${Math.round(r.time)}s / par ${r.par}s</span><span>${r.stars[1] ? 'YES' : 'no'}</span></div>
@@ -653,6 +667,8 @@ function updateHud(h) {
   $('#h-pctbar').style.width = `${h.pct}%`;
   set('h-score', fmt(h.score));
   set('h-mult', h.mult > 1 ? `x${h.mult}` : '');
+  set('h-aura', h.rushT > 0 ? `MOG RUSH ${Math.ceil(h.rushT)}s` : `AURA ${h.aura || 0}/40`);
+  $('#aura-fill').style.width = `${h.rushT > 0 ? h.rushT / 6 * 100 : (h.aura || 0) / 40 * 100}%`;
   const bon = h.bonuses
     .map((b) => `<span class="bchip" style="color:${BONUS_TYPES[b.type].color};border-color:${BONUS_TYPES[b.type].color}">${BONUS_TYPES[b.type].name.split(' ')[0].toUpperCase()} ${Math.ceil(b.t)}s</span>`)
     .join('');
