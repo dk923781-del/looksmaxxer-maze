@@ -1,3 +1,4 @@
+import { RADIO_TRACKS, radioAvailable, selectRadio, radioSelection, closeRadioPanel } from './radio.js';
 import { bus } from './bus.js';
 import * as SV from './save.js';
 import { levelFromXp, stageForLevel, xpForLevel } from './config.js';
@@ -18,6 +19,7 @@ export function initUI(scene) {
   document.addEventListener('click', onClick);
   document.addEventListener('pointerdown', () => initAudio(), { once: false });
   bus.on('hud', updateHud);
+  bus.on('radio:opened', () => { if (ui.inLevel && !ui.paused) ui.scene.pause(); });
   bus.on('level:won', (r) => showResult(r));
   bus.on('level:lost', (r) => showLost(r));
   bus.on('paused', (p) => {
@@ -37,12 +39,6 @@ export function initUI(scene) {
     if (document.hidden && ui.inLevel && !ui.paused) ui.scene.pause();
   });
   bindControls();
-  let visualFrame = 0;
-  const pulse = () => {
-    if (++visualFrame % 3 === 0) document.documentElement.style.setProperty('--beat', Math.min(1, levelNow() * 7).toFixed(3));
-    requestAnimationFrame(pulse);
-  };
-  pulse();
   applySettings();
   showMain(true);
 }
@@ -193,7 +189,7 @@ const actions = {
     applySettings();
     rerender();
   },
-  clearmusic: () => { clearCustomTrack(); rerender(); },
+  clearmusic: () => { selectRadio(''); clearCustomTrack(); rerender(); },
   musicmode: (d) => { setPlaybackMode(d.mode); rerender(); },
   reset: () =>
     showConfirm('RESET ALL PROGRESS?', 'Characters, coins, levels and skills will be erased.', () => {
@@ -204,7 +200,7 @@ const actions = {
       toast('Progress reset');
     }),
   credits: () => {
-    openModal(`<h2>CREDITS</h2><div style="font-size:8px;line-height:1.9">${MUSIC_CREDITS.map((c) => `<div class="kv" style="display:block"><span class="dim">${c.slot}</span><br><b>${c.title}</b> by ${c.artist}</div>`).join('')}<p class="dim">Music: Pixabay Content License. SFX and fallback music are synthesized. Local audio is chosen by the player.</p></div><button class="btn" data-act="closemodal" id="credits-close">CLOSE</button>`);
+    openModal(`<h2>Авторы</h2><div style="font-size:8px;line-height:1.9">${MUSIC_CREDITS.map((c) => `<div class="kv" style="display:block"><span class="dim">${c.slot}</span><br><b>${c.title}</b> by ${c.artist}</div>`).join('')}<p class="dim">Music: Pixabay Content License. SFX and fallback music are synthesized. Local audio is chosen by the player.</p></div><button class="btn" data-act="closemodal" id="credits-close">CLOSE</button>`);
   },
   resume: () => ui.scene.resume(),
   restart: () => {
@@ -277,6 +273,7 @@ export function showMain(reset) {
      <div class="feed-footer">Лови ауру. Теряй счёт времени.</div>`,
     { coins: false },
   );
+  document.body.dataset.playing = '0';
   $('#hud').hidden = true;
   $('#controls').hidden = true;
   if (ui.scene && ui.scene.S) ui.scene.quit();
@@ -333,18 +330,18 @@ function showPlay() {
 function worldBlurb(w) {
   return (
     {
-      1: 'Chasers and Doomers. Learn the maze. Level 5: Elite Hunter.',
-      2: 'Speed pads, red digital zones and secret walls. Level 5: Gym Tyrant.',
-      3: 'Mog Hunters stalk you. Level 5: ZETABOSS.',
-      4: 'Walls shift every 15s. Glitch Entities everywhere. Level 5: HULIOBOSS.',
-      5: 'Every mechanic at once. Level 5: DILDOBOSS, three phases.',
+      1: 'Освой лабиринт и обойди преследователей. На пятом уровне — Elite Hunter.',
+      2: 'Ускорители, опасные зоны и тайные стены. На пятом уровне — Gym Tyrant.',
+      3: 'Охотники идут по следу. На пятом уровне — ZETABOSS.',
+      4: 'Стены меняются каждые 15 секунд. На пятом уровне — HULIOBOSS.',
+      5: 'Все испытания сразу. На пятом уровне — финальный босс с тремя фазами.',
     }[w] || ''
   );
 }
 
 function bossLockText(ch) {
   const b = BOSSES[ch.unlock.boss];
-  return `Defeat ${b.name} first`;
+  return `Сначала победи ${b.name}`;
 }
 
 function showChars() {
@@ -357,12 +354,12 @@ function showChars() {
     if (owned) {
       const { li, stage } = charHeader(ch.id);
       info = `<span class="gold">Lv ${li.level}</span> · ${STAGE_NAMES[stage]}`;
-      action = d.sel === ch.id ? '<span class="green">SELECTED</span>' : `<button class="btn small" data-act="pick" data-id="${ch.id}" id="pick-${ch.id}">SELECT</button>`;
+      action = d.sel === ch.id ? '<span class="green">Выбран</span>' : `<button class="btn small" data-act="pick" data-id="${ch.id}" id="pick-${ch.id}">Выбрать</button>`;
     } else if (!unlocked) {
-      info = `<span class="red">LOCKED</span> · ${bossLockText(ch)}, then ${fmt(ch.price)}`;
+      info = `<span class="red">Закрыт</span> · ${bossLockText(ch)}, затем ${fmt(ch.price)}`;
     } else {
-      info = `${fmt(ch.price)} coins`;
-      action = `<button class="btn small gold ${d.coins >= ch.price ? '' : 'off'}" data-act="buychar" data-id="${ch.id}" id="buy-${ch.id}">BUY ${fmt(ch.price)}</button>`;
+      info = `${fmt(ch.price)} монет`;
+      action = `<button class="btn small gold ${d.coins >= ch.price ? '' : 'off'}" data-act="buychar" data-id="${ch.id}" id="buy-${ch.id}">Купить ${fmt(ch.price)}</button>`;
     }
     const stage = owned ? charHeader(ch.id).stage : 1;
     const skin = owned ? d.chars[ch.id].skin : 'base';
@@ -417,7 +414,7 @@ function showShop() {
         const unlocked = SV.isCharUnlocked(ch.id);
         let right;
         if (owned) right = '<span class="green">OWNED</span>';
-        else if (!unlocked) right = `<span class="red">LOCKED</span><div class="dim">${bossLockText(ch)}</div>`;
+        else if (!unlocked) right = `<span class="red">Закрыт</span><div class="dim">${bossLockText(ch)}</div>`;
         else right = `<button class="btn small gold ${d.coins >= ch.price ? '' : 'off'}" data-act="buychar" data-id="${ch.id}" id="shop-buy-${ch.id}">${fmt(ch.price)}</button>`;
         return `<div class="card"><div class="row"><div class="grow"><h3>${ch.name}</h3><span class="dim">${ch.ability.text}</span></div><div style="text-align:right">${right}</div></div></div>`;
       })
@@ -430,8 +427,8 @@ function showShop() {
         const owned = c.skins.includes(sk.id);
         const equipped = c.skin === sk.id;
         let right;
-        if (equipped) right = '<span class="green">EQUIPPED</span>';
-        else if (owned) right = `<button class="btn small" data-act="equip" data-id="${id}" data-skin="${sk.id}">EQUIP</button>`;
+        if (equipped) right = '<span class="green">Выбран</span>';
+        else if (owned) right = `<button class="btn small" data-act="equip" data-id="${id}" data-skin="${sk.id}">Выбрать</button>`;
         else right = `<button class="btn small gold ${d.coins >= sk.price ? '' : 'off'}" data-act="buyskin" data-id="${id}" data-skin="${sk.id}" id="buy-skin-${sk.id}">${fmt(sk.price)}</button>`;
         return `<div class="card"><div class="row"><img alt="" style="height:72px;width:auto;image-rendering:pixelated" src="${playerPreviewURL(id, sk.id, charHeader(id).stage, 4)}"><div class="grow"><h3>${sk.name}</h3><span class="dim">${sk.rarity || 'default'}</span></div>${right}</div></div>`;
       }).join('');
@@ -439,11 +436,11 @@ function showShop() {
     body = ITEMS.map((it) => {
       const have = d.inv[it.id];
       const full = have >= it.max;
-      return `<div class="card"><div class="row"><div class="grow"><h3>${it.name}</h3><span class="dim">${it.text}</span><div>Owned: <b class="gold">${have}/${it.max}</b></div></div>
+      return `<div class="card"><div class="row"><div class="grow"><h3>${it.name}</h3><span class="dim">${it.text}</span><div>В запасе: <b class="gold">${have}/${it.max}</b></div></div>
         <button class="btn small gold ${full || d.coins < it.price ? 'off' : ''}" data-act="buyitem" data-id="${it.id}" id="buy-${it.id}">${full ? 'MAX' : fmt(it.price)}</button></div></div>`;
     }).join('');
   }
-  setScreen(`<div class="tabs" style="display:flex">${tabs}</div>${body}`, { back: true, title: 'SHOP' });
+  setScreen(`<div class="tabs" style="display:flex">${tabs}</div>${body}`, { back: true, title: 'Магазин' });
 }
 
 function showQuests() {
@@ -455,33 +452,36 @@ function showQuests() {
       const done = it.progress >= def.target;
       return `<div class="card"><h3>${def.text}</h3><div class="bar ${done ? '' : 'pink'}"><i style="width:${(it.progress / def.target) * 100}%"></i></div>
         <div class="row" style="margin-top:8px;justify-content:space-between"><span>${it.progress}/${def.target} · <span class="gold">+${def.reward}</span></span>
-        ${it.claimed ? '<span class="green">CLAIMED</span>' : `<button class="btn small gold ${done ? '' : 'off'}" ${done ? '' : 'disabled'} data-act="claim" data-i="${i}" id="claim-${i}">CLAIM</button>`}</div></div>`;
+        ${it.claimed ? '<span class="green">Получено</span>' : `<button class="btn small gold ${done ? '' : 'off'}" ${done ? '' : 'disabled'} data-act="claim" data-i="${i}" id="claim-${i}">Забрать</button>`}</div></div>`;
     })
     .join('');
-  setScreen(`<div class="dim" style="font-size:8px;margin-bottom:8px">Daily quests reset at local midnight (${q.date}).</div>${body}`, { back: true, title: 'QUESTS' });
+  setScreen(`<div class="dim" style="font-size:8px;margin-bottom:8px">Задания обновляются в полночь (${q.date}).</div>${body}`, { back: true, title: 'Задания' });
 }
 
 function showSettings() {
+  const customOpen = document.querySelector('details.radio-card')?.open || false;
   const st = S().settings;
   setScreen(
-    `<div class="radio-card"><small>YOUR SOUND. YOUR AURA.</small><h3>Bring your edit.</h3><p>Choose a track from your device. It stays on this device and plays throughout the game.</p><label class="btn primary file-label">Choose audio<input id="custom-track" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg"></label><p id="track-name"></p><div class="radio-modes">${['original','slowed','sped'].map(m => `<button class="btn small ${playbackMode()===m?'active':''}" data-act="musicmode" data-mode="${m}">${m}</button>`).join('')}</div><button class="btn small" data-act="clearmusic">Use built-in soundtrack</button><p class="dim">Local track lasts until refresh. Slowed changes pitch and tempo.</p></div>
-     <div class="card"><div>Music volume</div><input id="s-music" class="slider" type="range" min="0" max="100" value="${Math.round(st.music * 100)}"></div>
-     <div class="card row"><span class="grow">Bass boost</span><button class="btn small toggle" data-act="toggle" data-k="bass" id="t-bass">${st.bass ? 'ON' : 'OFF'}</button></div>
-     <div class="card"><div>Effects volume</div><input id="s-sfx" class="slider" type="range" min="0" max="100" value="${Math.round(st.sfx * 100)}"></div>
-     <div class="card"><div>Boss voice volume</div><input id="s-voice" class="slider" type="range" min="0" max="100" value="${Math.round(st.voice * 100)}"></div>
-     <div class="card row"><span class="grow">Mute all</span><button class="btn small toggle" data-act="toggle" data-k="mute" id="t-mute">${st.mute ? 'ON' : 'OFF'}</button></div>
-     <div class="card row"><span class="grow">Vibration</span><button class="btn small toggle" data-act="toggle" data-k="vibration" id="t-vib">${st.vibration ? 'ON' : 'OFF'}</button></div>
-     <div class="card row"><span class="grow">Mobile controls</span><button class="btn small toggle" data-act="toggle" data-k="controls" id="t-ctl">${st.controls === 'dpad' ? 'D-PAD' : 'SWIPE'}</button></div>
-     <button class="btn" data-act="credits" id="btn-credits">CREDITS</button>
-     <button class="btn" style="border-color:var(--red);color:var(--red)" data-act="reset" id="btn-reset">RESET PROGRESS</button>
+    `<div class="radio-card"><h3>Твой саундтрек</h3><p>Hunter Eyes — SoundCloud. ASCEND — Audiomack. Выбери трек и нажми ▶ в плеере. Файлы загружать не нужно.</p><div class="track-list">${RADIO_TRACKS.map(t=>`<button class="btn small ${radioSelection()===t.id?'active':''}" data-radio="${t.id}" ${radioAvailable(t)?'':'disabled'}><strong>${t.title}</strong><span>${t.artist}${radioAvailable(t)?'':' · плеер недоступен на iPhone'}</span></button>`).join('')}</div><button class="btn small" data-radio="">Встроенная музыка</button><p class="dim">Выбор сохраняется. Нужен интернет и доступ к музыкальному сервису. Выбор остаётся после перезагрузки; телефон может потребовать нажатия ▶.</p></div><details class="radio-card"><summary>Свой аудиофайл</summary><label class="btn primary file-label">Выбрать файл<input id="custom-track" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg"></label><p id="track-name"></p><div class="radio-modes">${['original','slowed','sped'].map(m => `<button class="btn small ${playbackMode()===m?'active':''}" data-act="musicmode" data-mode="${m}">${m}</button>`).join('')}</div><button class="btn small" data-act="clearmusic">Вернуть встроенную музыку</button><p class="dim">Файл действует до перезагрузки. Скорость и бас применяются только к встроенной музыке и своим файлам.</p></details>
+     <div class="card"><div>Громкость встроенной музыки / SoundCloud</div><input id="s-music" class="slider" type="range" min="0" max="100" value="${Math.round(st.music * 100)}"></div>
+     <div class="card row"><span class="grow">Усиление баса</span><button class="btn small toggle" data-act="toggle" data-k="bass" id="t-bass">${st.bass ? 'ON' : 'OFF'}</button></div>
+     <div class="card"><div>Громкость эффектов</div><input id="s-sfx" class="slider" type="range" min="0" max="100" value="${Math.round(st.sfx * 100)}"></div>
+     <div class="card"><div>Голос боссов</div><input id="s-voice" class="slider" type="range" min="0" max="100" value="${Math.round(st.voice * 100)}"></div>
+     <div class="card row"><span class="grow">Выключить звук</span><button class="btn small toggle" data-act="toggle" data-k="mute" id="t-mute">${st.mute ? 'ON' : 'OFF'}</button></div>
+     <div class="card row"><span class="grow">Вибрация</span><button class="btn small toggle" data-act="toggle" data-k="vibration" id="t-vib">${st.vibration ? 'ON' : 'OFF'}</button></div>
+     <div class="card row"><span class="grow">Управление</span><button class="btn small toggle" data-act="toggle" data-k="controls" id="t-ctl">${st.controls === 'dpad' ? 'D-PAD' : 'SWIPE'}</button></div>
+     <button class="btn" data-act="credits" id="btn-credits">Авторы</button>
+     <button class="btn" style="border-color:var(--red);color:var(--red)" data-act="reset" id="btn-reset">Сбросить прогресс</button>
      <div class="dim" style="font-size:7px;text-align:center;line-height:1.8">MOGGMAN<br>Keys: arrows / WASD, Space = ability, Esc = pause</div>`,
-    { back: true, title: 'MOG RADIO' },
+    { back: true, title: 'Музыка и настройки' },
   );
+  document.querySelector('details.radio-card').open = customOpen;
+  document.querySelectorAll('[data-radio]').forEach(b => b.onclick = () => { selectRadio(b.dataset.radio); showSettings(); if (b.dataset.radio) { document.querySelector('#radio-panel').hidden = false; document.querySelector('#radio-toggle').setAttribute('aria-expanded','true'); } });
   $('#track-name').textContent = customTrackName() || 'Built-in phonk soundtrack';
   $('#custom-track').addEventListener('change', async (e) => {
     const file = e.target.files[0]; if (!file) return;
     const status = $('#track-name'); status.textContent = 'Loading track…';
-    try { await setCustomTrack(file); status.textContent = customTrackName(); toast('Your track is ready'); }
+    try { await setCustomTrack(file); selectRadio(''); status.textContent = customTrackName(); toast('Your track is ready'); }
     catch (err) { status.textContent = err.message; }
   });
   const bind = (id, key) => {
@@ -583,6 +583,7 @@ function showLost(r) {
 
 // ---------------- level start / HUD / controls ----------------
 function startLevel(w, l) {
+  closeRadioPanel();
   hideScreen();
   closeModal();
   ui.inLevel = true;
@@ -593,7 +594,7 @@ function startLevel(w, l) {
   setBack(() => bus.emit('input:pause'));
   stopMusic();
   ui.scene.startLevel({ w, l, hard: !!S().hard && SV.charStats(S().sel).hardOk });
-  requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+  document.body.dataset.playing = '1';
 }
 
 function updateControlsVisibility() {
@@ -627,6 +628,8 @@ function bindControls() {
   let sy = 0;
   let down = false;
   stage.addEventListener('pointerdown', (e) => {
+    if (!ui.inLevel || ui.paused) return;
+    stage.setPointerCapture(e.pointerId);
     down = true;
     sx = e.clientX;
     sy = e.clientY;
@@ -644,6 +647,8 @@ function bindControls() {
   const up = () => (down = false);
   stage.addEventListener('pointerup', up);
   stage.addEventListener('pointercancel', up);
+  stage.addEventListener('lostpointercapture', up);
+  window.addEventListener('blur', up);
 }
 
 let lastHud = '';
@@ -687,7 +692,8 @@ function updateHud(h) {
   const ab = $('#btn-ability');
   const ready = h.ability.cd <= 0 && h.ability.active <= 0;
   ab.classList.toggle('ready', ready);
-  ab.querySelector('.nm').textContent = h.ability.active > 0 ? `${Math.ceil(h.ability.active)}s` : ready ? h.ability.name : `${Math.ceil(h.ability.cd)}s`;
+  ab.querySelector('.nm').textContent = h.ability.active > 0 ? `${Math.ceil(h.ability.active)}с` : ready ? '✦' : `${Math.ceil(h.ability.cd)}с`;
+  ab.setAttribute('aria-label', `${h.ability.name}: ${ready ? 'готова' : 'восстанавливается'}`);
   ab.querySelector('.cd').style.height = ready || h.ability.active > 0 ? '0' : `${(h.ability.cd / h.ability.cdMax) * 100}%`;
   const en = $('#btn-energy');
   const sh = $('#btn-shield');

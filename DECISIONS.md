@@ -1,3 +1,3 @@
 # Current decisions
 
-See README.md for version 2. Save IDs stay compatible; portraits replace the previous sprite artwork; reloads wait for the menu. Protected requested recordings are not bundled.
+Stable logical renderer, fixed HUD status space and uniform touch keys. Follow Telegram stable viewport. Stream requested songs through visible, user-expandable official players; do not copy recordings. Player selection persists separately from game saves. See README.md for provider limitations and checks.

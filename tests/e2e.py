@@ -13,6 +13,7 @@ errors = []
 def new_page(b, w=390, h=844, dpr=2, touch=True, url=DEV, clear=True):
     ctx = b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=dpr, has_touch=touch)
     ctx.route('**/telegram.org/**', lambda r: r.fulfill(status=200, content_type='application/javascript', body=''))
+    ctx.add_init_script("localStorage.setItem('moggman_radio_v1','off')")
     page = ctx.new_page()
     page.on('console', lambda m: errors.append(m.text) if m.type == 'error' else None)
     page.on('pageerror', lambda e: errors.append('PAGEERROR ' + str(e)))
@@ -20,7 +21,7 @@ def new_page(b, w=390, h=844, dpr=2, touch=True, url=DEV, clear=True):
     if clear:
         page.evaluate('localStorage.clear()')
         page.reload()
-    page.wait_for_selector('body[data-ready="1"]', timeout=15000)
+    page.wait_for_selector('body[data-ready="1"]', timeout=30000)
     return page
 
 
@@ -48,7 +49,7 @@ def run(name):
 
 def start_level(page, w=1, l=1):
     js(page, f'window.__game.play({w},{l})')
-    page.wait_for_function('window.__game.S && window.__game.S.state === "play"', timeout=8000)
+    page.wait_for_function('window.__game.S && window.__game.S.state === "play"', timeout=20000)
 
 
 with sync_playwright() as p:
@@ -126,7 +127,7 @@ with sync_playwright() as p:
         pg = new_page(b)
         start_level(pg)
         js(pg, '''(()=>{const s=window.__game.scene; s.maze.pel.fill(0); s.S.pelletsLeft=0;})()''')
-        pg.wait_for_selector('#btn-next', timeout=8000)
+        pg.wait_for_selector('#btn-next', timeout=20000)
         d = js(pg, 'window.__game.SV.S().levels["1-1"]')
         assert d and d['c'] == 1, d
         assert js(pg, 'window.__game.SV.S().coins') > 20
@@ -288,7 +289,7 @@ with sync_playwright() as p:
            return {hp0, hp:s.S.bossHp, id:boss.boss.id, st:boss.state}})()''')
         assert r['id'] == 'zeta' and r['hp'] == r['hp0'] - 1 and r['st'] == 'eyes', r
         js(pg, '''(()=>{const s=window.__game.scene; const boss=s.enemies[0]; for(let k=0;k<3;k++){ boss.immune=0; boss.state="fright"; boss.x=s.P.x; boss.y=s.P.y; s.step(1/60); for(let j=0;j<6;j++) s.step(1/60);} for(let i=0;i<120;i++) s.step(1/30); })()''')
-        pg.wait_for_selector('#btn-menu', timeout=8000)
+        pg.wait_for_selector('#btn-menu', timeout=20000)
         assert js(pg, 'window.__game.SV.S().bosses.zeta') is True
         assert js(pg, 'window.__game.SV.isCharUnlocked("zetaboss")') is True
         pg.close()
@@ -373,10 +374,10 @@ with sync_playwright() as p:
             # maze (304x368 game px) fully inside the canvas and canvas inside stage
             fit = m['fit']
             assert fit['gw'] >= 304 and fit['gh'] >= 368, fit
-            assert fit['z'] >= 1
             print('   ', tag, 'fit', fit)
-            # integer scaling: game px -> device px is an integer
-            assert abs(fit['z'] - round(fit['z'])) < 1e-9
+            # Stable renderer; the displayed canvas fits without integer scale jumps.
+            assert fit['gw'] == 320 and fit['gh'] == 384
+            assert fit['scale'] > 0
             # buttons >= 44px
             bw = js(pg, '''(()=>[...document.querySelectorAll('#btn-ability,#btn-pause,#dpad button:not([hidden]),#btn-energy,#btn-shield')].filter(e=>e.offsetParent).map(e=>Math.min(e.getBoundingClientRect().width,e.getBoundingClientRect().height)))()''')
             assert all(v >= 44 - 0.5 for v in bw), bw

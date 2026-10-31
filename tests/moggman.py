@@ -11,6 +11,7 @@ with sync_playwright() as p:
  errors=[]; uploads=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
  page.on('request',lambda r: uploads.append(r.url) if r.method=='POST' else None)
+ page.add_init_script("localStorage.setItem('moggman_radio_v1','off')")
  page.goto(URL); page.wait_for_selector('body[data-ready="1"]')
  assert page.title().startswith('MOGGMAN')
  for w,h in [(390,844),(320,568),(1440,900)]:
@@ -21,6 +22,7 @@ with sync_playwright() as p:
  page.set_viewport_size({'width':390,'height':844})
  page.screenshot(path=str(OUT/'moggman-menu.png'))
  page.click('#btn-settings')
+ page.locator('summary').click()
  page.set_input_files('#custom-track',str(ROOT/'public/assets/music/menu.mp3'))
  page.wait_for_function("window.__game.mods.audio.customTrackName()==='menu.mp3'")
  page.wait_for_function('window.__game.mods.audio.playingFile()')

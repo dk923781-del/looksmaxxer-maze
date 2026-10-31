@@ -1,3 +1,11 @@
+import { bus } from './bus.js';
+let externalMusic = false;
+export function setExternalMusic(enabled) {
+  externalMusic = enabled;
+  ++playbackGeneration;
+  stopTimer(); stopFile();
+  if (!enabled && wantTrack !== null) startMusic(wantTrack);
+}
 // Web Audio mixer: built-in files, original synth fallback and user-selected local tracks.
 let ctx = null;
 let master;
@@ -74,6 +82,7 @@ export function setVolumes(m, s, mute, extra = {}) {
   if (extra.voice !== undefined) vol.voice = extra.voice;
   if (extra.bass !== undefined) vol.bass = extra.bass;
   applyVolumes();
+  bus.emit('audio:volume');
 }
 
 function applyVolumes() {
@@ -470,7 +479,7 @@ export const playingFile = () => !!fileSrc;
 export function startMusic(i) {
   wantTrack = i;
   const generation = ++playbackGeneration;
-  if (!ctx) return;
+  if (!ctx || externalMusic) return;
   stopTimer();
   stopFile();
   if (customBuffer || fileMap[i]) {

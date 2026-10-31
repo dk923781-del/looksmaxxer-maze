@@ -13,3 +13,14 @@ Built-in tracks are original, synthesized in `src/audio.js`. Add every licensed 
 | 5 | boss.mp3 | Brazilian Phonk Music | AbsoluteSound | https://pixabay.com/music/phonk-brazilian-phonk-music-529762/ | Pixabay Content License (per track page) | 2026-10-29 |
 
 Notes: downloaded by the project owner from Pixabay on 2026-10-29. Pixabay blocks automated access, so the per-track "Content ID Registered" / "AI generated" labels were NOT verified by Claude. Check them on the track pages if you plan to post gameplay on YouTube/TikTok.
+
+
+## Online players (2.1)
+
+These recordings are NOT included as files. Playback is provided by the publisher-hosted embed, with its native controls and attribution. Availability and playback depend on the provider/browser.
+
+- Hunter Eyes — laydownrot: https://soundcloud.com/laydownrot/mirror-lies-hunter-eyes
+- Play Hard (Slowed) — Hardstyle Demon, ASCEND: https://audiomack.com/hardstyle-demon-1/song/play-hard-slowed
+- Play Hard (Ultra Slowed) — Hardstyle Demon, ASCEND: https://audiomack.com/hardstyle-demon-1/song/play-hard-ultra-slowed
+
+No license to redistribute the underlying recordings is asserted. SoundCloud integration: https://developers.soundcloud.com/docs/api/html5-widget .

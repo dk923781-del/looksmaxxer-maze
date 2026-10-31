@@ -15,33 +15,33 @@
           <div class="who"><b id="h-who"></b> <span id="h-lv" class="gold"></span><div class="xpbar"><i id="h-xp"></i></div></div>
           <span class="chip"><i class="coin"></i><span id="h-coins">0</span></span>
           <span class="chip heart" id="h-lives"></span>
-          <span class="chip" id="h-bp"></span>
+          <button class="pbtn" id="btn-pause" aria-label="Пауза">Ⅱ</button>
         </div>
         <div class="hrow">
           <span id="h-level"></span>
           <div class="who"><div class="bar pink"><i id="h-pctbar"></i></div></div>
           <span id="h-pct"></span>
-          <span><span id="h-score">0</span> <span class="mult" id="h-mult"></span></span>
-          <button class="pbtn" id="btn-pause" aria-label="Pause">II</button>
+          <span class="score"><span id="h-score">0</span> <span class="mult" id="h-mult"></span></span>
         </div>
         <div class="aura-row"><span id="h-aura">AURA 0/40</span><div class="aura-meter"><i id="aura-fill"></i></div></div>
-        <div class="hrow" id="hud-boss" hidden><span id="h-bossname"></span><div class="who bar red"><i id="h-bosshp"></i></div></div>
-        <div id="hud-bonus" hidden></div>
+        <div class="hud-status"><div class="hrow" id="hud-boss" hidden><span id="h-bossname"></span><div class="who bar red"><i id="h-bosshp"></i></div></div>
+        <div id="hud-bonus" hidden></div><span id="h-bp" aria-label="Запас чёрных пилюль"></span></div>
       </div>
       <div id="stage"><div id="game"></div></div>
       <div id="controls" hidden>
         <div id="dpad">
-          <button class="u" data-d="u" aria-label="Up">&#9650;</button>
-          <button class="l" data-d="l" aria-label="Left">&#9664;</button>
-          <button class="r" data-d="r" aria-label="Right">&#9654;</button>
-          <button class="d" data-d="d" aria-label="Down">&#9660;</button>
+          <button class="u" data-d="u" aria-label="Up"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
+          <button class="l" data-d="l" aria-label="Left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <button class="r" data-d="r" aria-label="Right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="d" data-d="d" aria-label="Down"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
         </div>
         <div id="actions">
-          <button class="ibtn" id="btn-energy">BOOST<br /><b>0</b></button>
-          <button class="ibtn" id="btn-shield">SHIELD<br /><b>0</b></button>
-          <button class="abtn" id="btn-ability"><span class="nm"></span><span class="cd"></span></button>
+          <button class="ibtn" id="btn-energy" aria-label="Ускорение"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 9-12h-7z"/></svg><b>0</b></button>
+          <button class="ibtn" id="btn-shield" aria-label="Щит"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4-5 8-8 9-3-1-8-5-8-9V6z"/></svg><b>0</b></button>
+          <button class="abtn" id="btn-ability" aria-label="Способность"><span class="nm"></span><span class="cd"></span></button>
         </div>
       </div>
+      <section id="radio-dock" aria-label="Музыка" hidden><div class="radio-bar"><button id="radio-toggle" aria-expanded="false" aria-controls="radio-panel"><span aria-hidden="true">♫</span><span id="radio-status">Музыка</span><span aria-hidden="true">⌃</span></button><button id="radio-off" aria-label="Выключить онлайн-музыку">×</button></div><div id="radio-panel" hidden><p id="radio-help">Нажми ▶. Затем сверни плеер — музыка продолжит играть.</p><iframe id="radio-player" title="Музыкальный плеер Moggman" allow="autoplay; encrypted-media" scrolling="no" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></section>
       <div id="screen" hidden></div>
       <div id="modal" hidden></div>
       <div id="toast" hidden></div>

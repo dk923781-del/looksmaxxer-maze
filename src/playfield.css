@@ -1,0 +1,53 @@
+/* Stable gameplay geometry. No score, timer or pickup can change these rows. */
+#app{height:var(--app-height,100svh);padding:var(--safe-top,env(safe-area-inset-top)) var(--safe-right,env(safe-area-inset-right)) var(--safe-bottom,env(safe-area-inset-bottom)) var(--safe-left,env(safe-area-inset-left))}
+#screen{padding-top:var(--safe-top,env(safe-area-inset-top));padding-bottom:var(--safe-bottom,env(safe-area-inset-bottom))}
+#hud{height:124px;flex:0 0 124px;padding:8px 14px;background:var(--bg);border-bottom:1px solid #292d3c;font-variant-numeric:tabular-nums;font-size:11px;line-height:1.2;overflow:hidden}
+#hud>.hrow{height:44px;gap:8px;margin:0}
+#hud>.hrow:nth-child(2){height:22px;gap:10px}
+#hud .who{overflow:hidden}
+#h-who{display:inline-block;max-width:calc(100% - 34px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;font-size:12px}
+#hud .chip{border:0;background:none;padding:0;font-size:11px}
+#h-coins{min-width:28px}#h-lives{width:47px;overflow:hidden;letter-spacing:0;color:#ff7597}
+#h-level{flex:0 0 48px;color:var(--dim)}#h-pct{flex:0 0 30px;text-align:right}#hud .score{flex:0 0 76px;text-align:right;white-space:nowrap;overflow:hidden}
+#hud .pbtn{width:44px;height:44px;min-height:44px;border:1px solid #383d50;border-radius:10px;background:#191d2b;color:var(--text);font-size:18px}
+#hud .aura-row{height:20px;padding:0;gap:10px;font-size:9px}#h-aura{width:100px;white-space:nowrap}
+.hud-status{height:22px;display:flex;align-items:center;gap:8px;overflow:hidden}
+#hud-bonus{height:20px;flex:1;min-width:0;flex-wrap:nowrap;align-items:center;overflow:hidden}
+.bchip{font-size:9px;line-height:16px;padding:0 5px;border-radius:4px;white-space:nowrap;background:#171b29}
+#hud-boss{height:20px;flex:1;min-width:0;margin:0;font-size:9px;gap:8px}#h-bossname{max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#h-bp{display:flex;gap:4px;margin-left:auto;flex:0 0 35px}
+#stage{background:#090d16;min-width:0}#game{flex:none}#game canvas{image-rendering:auto;max-width:none;max-height:none}
+#controls,#controls.slim{--key:48px;flex:0 0 124px;height:124px;min-height:124px;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;gap:12px;border-top:1px solid #292d3c;background:var(--bg)}
+#dpad{grid-template-columns:repeat(3,var(--key));grid-template-rows:repeat(2,var(--key));gap:4px;flex:none}
+#actions{display:grid;grid-template-columns:repeat(2,var(--key));grid-template-rows:repeat(2,var(--key));gap:8px;flex:none;margin-left:auto;align-items:center}
+#btn-ability{grid-column:2;grid-row:2}
+#dpad button,#actions button{position:relative;display:flex;align-items:center;justify-content:center;flex:none;width:var(--key);min-width:var(--key);height:var(--key);min-height:var(--key);padding:0;margin:0;border:1px solid #42495e;border-radius:12px;background:#202638;color:#dce3f6;box-shadow:0 2px 0 #05070c;font-size:14px;line-height:1;touch-action:none;overflow:hidden;transition:background .08s,border-color .08s}
+#dpad button:active,#actions button:active{background:#424b64;border-color:#a3e7ea;transform:none;box-shadow:none}
+#dpad button svg,#actions button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+#actions button b{position:absolute;right:4px;bottom:3px;font-size:10px;font-weight:600;line-height:12px}
+#actions .abtn.ready{background:#40253a!important;border-color:#e36d96!important;color:#ffd7e5!important;box-shadow:0 2px 0 #05070c!important}
+#actions .abtn .nm{position:relative;z-index:1;font-size:15px}#actions .abtn.ready .nm{font-size:28px}
+#actions button:disabled{opacity:.4;cursor:default}#controls.slim{height:76px;min-height:76px;flex-basis:76px}#controls.slim #actions{display:flex}
+#radio-dock{flex:0 0 44px;height:44px;background:#171b27;position:relative;z-index:30;border-top:1px solid #353b50}
+#radio-panel{position:absolute;bottom:44px;left:0;right:0;background:#171b27;border:1px solid #353b50;border-radius:14px 14px 0 0;box-shadow:0 -10px 40px #0008;overflow:hidden}
+#radio-help{font-size:12px;line-height:1.5;margin:0;padding:12px 16px;color:#d6d8e2}
+#radio-player{display:block;width:100%;height:166px;border:0;background:#171b27}
+.radio-bar{height:44px;display:flex;align-items:center;gap:4px;padding:0 6px}
+#radio-toggle{display:flex;align-items:center;gap:10px;flex:1;min-width:0;height:44px;border:0;background:none;color:#c6cbda;text-align:left;padding:0 8px;font-size:11px}
+#radio-status{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#radio-off{flex:0 0 44px;width:44px;height:44px;border:0;background:none;font-size:24px;color:#c6cbda}
+.has-radio #screen{bottom:44px}
+.track-list .btn{text-align:left}.track-list strong,.track-list span{display:block}.track-list span{font-size:11px;color:var(--dim);margin-top:4px}
+.radio-card summary{cursor:pointer;font-size:14px}.radio-card summary~*{margin-top:12px}.radio-card h3{font-size:25px}.radio-card{background:var(--panel);border-color:var(--line)}
+/* Landscape uses the wide window: controls alongside the maze, not over it. */
+html[data-layout="landscape"] #app{width:100%;max-width:900px;display:grid;grid-template-columns:1fr 280px;grid-template-rows:124px 1fr}
+html[data-layout="landscape"] #hud{grid-column:1;grid-row:1;width:100%}
+html[data-layout="landscape"] #stage{grid-column:1;grid-row:2;width:100%;height:100%}
+html[data-layout="landscape"] #controls,html[data-layout="landscape"] #controls.slim{grid-column:2;grid-row:1/3;height:100%;min-height:0;width:280px;padding:10px;align-self:stretch;border-left:1px solid #292d3c;border-top:0}
+html[data-layout="landscape"] #app.has-radio{grid-template-rows:124px 1fr 44px}
+html[data-layout="landscape"] #radio-dock{grid-column:1/3;grid-row:3}
+html[data-layout="landscape"] #controls.slim #actions{display:grid}
+html[data-layout="landscape"] #screen{grid-column:1/3;grid-row:1/4}
+@media(max-width:359px){#controls{padding-left:12px;padding-right:12px}#hud{padding-left:10px;padding-right:10px}#h-lives{width:40px;font-size:9px}#hud>.hrow{gap:6px}}
+@media(prefers-reduced-motion:reduce){#dpad button,#actions button{transition:none}}
+
+#dpad .d{grid-area:2 / 2}

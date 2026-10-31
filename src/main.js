@@ -3,6 +3,9 @@ import '@fontsource/press-start-2p/400.css';
 import './styles.css';
 import './moggman.css';
 import './feed.css';
+import { initViewport, fitCanvas } from './viewport.js';
+import { initRadio } from './radio.js';
+import './playfield.css';
 import { watchUpdates } from './updates.js';
 import { MW, MH } from './config.js';
 import * as texMod from './textures.js';
@@ -35,6 +38,7 @@ class Boot extends Phaser.Scene {
 
 async function main() {
   initTelegram();
+  initViewport();
   await loadSave();
   let sheets = [];
   try {
@@ -55,11 +59,11 @@ async function main() {
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: 'game',
-    width: MW,
-    height: MH,
+    width: MW + 16,
+    height: MH + 16,
     backgroundColor: '#000000',
     pixelArt: false,
-    roundPixels: true,
+    roundPixels: false,
     antialias: true,
     disableContextMenu: true,
     scale: { mode: Phaser.Scale.NONE },
@@ -67,33 +71,16 @@ async function main() {
     callbacks: { preBoot: (g) => g.registry.set('sheets', sheets) },
   });
 
-  // Integer scaling: every game pixel is an integer number of device pixels.
-  const fit = () => {
-    const W = stage.clientWidth;
-    const H = stage.clientHeight;
-    if (!W || !H) return;
-    const dpr = window.devicePixelRatio || 1;
-    const s = Math.min(W / MW, H / MH);
-    const z = Math.max(1, Math.floor(dpr * s));
-    const gw = Math.ceil((W * dpr) / z);
-    const gh = Math.ceil((H * dpr) / z);
-    game.scale.resize(gw, gh);
-    game.scale.setZoom(z / dpr);
-    const c = game.canvas;
-    if (c) {
-      c.style.width = `${(gw * z) / dpr}px`;
-      c.style.height = `${(gh * z) / dpr}px`;
-    }
-    window.__fit = { W, H, dpr, z, gw, gh };
-  };
+  // Keep the renderer and logical world fixed. Only the displayed canvas scales.
+  const fit = () => fitCanvas(game, stage, MW + 16, MH + 16);
   new ResizeObserver(fit).observe(stage);
-  window.addEventListener('resize', fit);
 
   game.events.once('ready', () => {
     const scene = game.scene.getScene('game');
     const boot = () => {
       fit();
       initUI(scene);
+      initRadio();
       fit();
       if (import.meta.env.DEV) window.__game = { game, scene, SV, bus, play: playLevel, mods: { textures: texMod, audio: audioMod, data: dataMod }, ui: uiState, get S() { return scene.S; } };
       document.body.dataset.ready = '1';

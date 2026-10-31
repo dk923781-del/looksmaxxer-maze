@@ -216,7 +216,7 @@ export default class GameScene extends Phaser.Scene {
   drawStatic() {
     const maze = this.maze;
     this.panel.clear();
-    this.panel.fillStyle(0x05030c, 0.88);
+    this.panel.fillStyle(0x090d16, 1);
     this.panel.fillRect(-4, -4, MW + 8, MH + 8);
     this.drawWalls();
     // speed pads
